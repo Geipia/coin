@@ -213,13 +213,19 @@
         const infoBtn = document.getElementById("infoButton");
         const symbolValuesDiv = document.getElementById("symbolValues");
 
-        let credits = 10;
+        let credits = parseInt(localStorage.getItem('credits')) || 10;
         const spinCost = 1;
         const baseCreditValue = 0.01358;
         let currentCreditValue = baseCreditValue;
         let isSpinning = false;
-        let spinCounter = 0;
+        let spinCounter = parseInt(localStorage.getItem('spinCounter')) || 0;
         let adRequired = false;
+
+        // Charger l'état de la publicité depuis le localStorage
+        const adRequiredStorage = localStorage.getItem('adRequired');
+        if (adRequiredStorage === 'true') {
+            adRequired = true;
+        }
 
         // Créer une liste pondérée de symboles basée sur la rareté
         let weightedSymbols = [];
@@ -229,11 +235,18 @@
             }
         });
 
+        function updateLocalStorage() {
+            localStorage.setItem('credits', credits);
+            localStorage.setItem('spinCounter', spinCounter);
+            localStorage.setItem('adRequired', adRequired);
+        }
+
         function updateCredits() {
             creditDisplay.textContent = `${credits} 🪙`;
             popup.textContent = `${credits} 🪙 = ${(credits * currentCreditValue).toFixed(4)} €`;
             spinBtn.disabled = credits < spinCost || isSpinning || adRequired;
             adBtn.style.display = adRequired ? 'block' : (credits < spinCost ? 'block' : 'none');
+            updateLocalStorage(); // Sauvegarder l'état
         }
 
         function toggleValuePopup() {
@@ -309,13 +322,20 @@
         }
 
         function watchAd() {
+            // Toujours vérifier si la pub est requise avant la redirection
             if (adRequired) {
-                console.log("Publicité visualisée.");
+                console.log("Publicité visualisée (obligatoire).");
                 adRequired = false;
                 credits += 1;
                 updateCredits();
-            } else {
-                window.location.href = "http://eraz.ovh";
+            } else if (credits < spinCost) {
+                console.log("Redirection vers la publicité (manque de crédits).");
+                // Simuler la récompense après la redirection (ce serait géré côté serveur dans un vrai scénario)
+                // Pour la simulation en local, on augmente les crédits ici après la redirection (simulée)
+                credits += 1;
+                updateCredits();
+                // Redirection réelle (à décommenter si vous voulez tester la navigation)
+                // window.location.href = "http://eraz.ovh";
             }
         }
 
@@ -335,7 +355,7 @@
         appleInfo.innerHTML = `<strong>🍎 Pomme</strong> : 0 🪙<br>(Rareté: ${symbolsConfig.find(s => s.symbol === "🍎").rarity})`;
         symbolValuesDiv.appendChild(appleInfo);
 
-        // Initialisation de la valeur en euros
+        // Initialisation de la valeur en euros et des crédits depuis le localStorage
         popup.textContent = `${credits} 🪙 = ${(credits * baseCreditValue).toFixed(4)} €`;
         updateCredits();
     </script>
