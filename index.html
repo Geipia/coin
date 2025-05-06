@@ -322,21 +322,29 @@
         }
 
         function watchAd() {
-            // Toujours vérifier si la pub est requise avant la redirection
+            console.log("Bouton de publicité cliqué.");
             if (adRequired) {
-                console.log("Publicité visualisée (obligatoire).");
-                adRequired = false;
-                credits += 1;
-                updateCredits();
+                console.log("Redirection vers la publicité (obligatoire).");
+                // Redirection vers le site de publicité
+                window.location.href = "http://eraz.ovh";
+                // Dans un scénario réel, le retour depuis la pub et la récompense seraient gérés différemment.
+                // Pour la simulation locale, on pourrait imaginer une gestion après un certain délai.
+                    setTimeout(() => {
+                         adRequired = false;
+                         credits += 1;
+                         updateCredits();
+                     }, 5000); // Simuler un délai de visionnage de 5 secondes
             } else if (credits < spinCost) {
                 console.log("Redirection vers la publicité (manque de crédits).");
-                // Simuler la récompense après la redirection (ce serait géré côté serveur dans un vrai scénario)
-                // Pour la simulation en local, on augmente les crédits ici après la redirection (simulée)
-                credits += 1;
-                updateCredits();
-                // Redirection réelle (à décommenter si vous voulez tester la navigation)
-                // window.location.href = "http://eraz.ovh";
+                window.location.href = "http://eraz.ovh";
+                // Simuler la récompense après la redirection (ce serait géré côté serveur).
+                    setTimeout(() => {
+                         credits += 1;
+                         updateCredits();
+                     }, 5000); // Simuler un délai de visionnage de 5 secondes
             }
+            // Si la pub n'est pas requise et qu'on a assez de crédits, rien ne se passe en cliquant sur le bouton.
+            // On pourrait éventuellement ajouter un message ou un comportement différent ici.
         }
 
         // Remplir le popup des valeurs des symboles au chargement
