@@ -192,13 +192,13 @@
 
     <script>
         const symbolsConfig = [
-            { symbol: "🍒", value: 1, rarity: 40 }, // Encore plus fréquent
+            { symbol: "🍒", value: 1, rarity: 40 },
             { symbol: "🍋", value: 2, rarity: 35 },
-            { symbol: "🍎", value: 0, rarity: 75 }, // Pomme qui ne rapporte rien, très fréquente
+            { symbol: "🍎", value: 0, rarity: 75 },
             { symbol: "🍊", value: 3, rarity: 25 },
             { symbol: "🔔", value: 5, rarity: 15 },
             { symbol: "⭐", value: 8, rarity: 8 },
-            { symbol: "💎", value: 12, rarity: 2 }   // Reste très rare
+            { symbol: "💎", value: 12, rarity: 2 }
         ];
 
         const slots = [document.getElementById("slot1"), document.getElementById("slot2"), document.getElementById("slot3")];
@@ -215,7 +215,7 @@
 
         let credits = 10;
         const spinCost = 1;
-        const baseCreditValue = 0.01358;
+        const baseCreditValue = 0.0100;
         let currentCreditValue = baseCreditValue;
         let isSpinning = false;
 
@@ -313,16 +313,14 @@
         symbolValuesDiv.innerHTML = "<h3>Valeurs des Symboles et Gains:</h3>"; // Réinitialiser le contenu
         symbolsConfig.forEach(item => {
             const symbolInfo = document.createElement('p');
+            const tripleWin = item.symbol === "🍎" ? "0" : `+${item.value * 10}`;
+            const doubleWin = item.symbol === "🍎" ? "0" : `+${item.value * 2}`;
             symbolInfo.innerHTML = `<strong>${item.symbol}</strong> : ${item.value} 🪙<br>
-                                   Triple: +${item.value * 10} 🪙 (sauf 🍎)<br>
-                                   Double: +${item.value * 2} 🪙 (sauf 🍎)<br>
+                                   Triple: ${tripleWin} 🪙<br>
+                                   Double: ${doubleWin} 🪙<br>
                                    (Rareté: ${item.rarity})`;
             symbolValuesDiv.appendChild(symbolInfo);
         });
-        // Ajouter une mention spéciale pour la pomme
-        const appleInfo = document.createElement('p');
-        appleInfo.innerHTML = `<strong>🍎 Pomme</strong> : 0 🪙<br>(Rareté: ${symbolsConfig.find(s => s.symbol === "🍎").rarity})`;
-        symbolValuesDiv.appendChild(appleInfo);
 
         // Initialisation de la valeur en euros
         popup.textContent = `${credits} 🪙 = ${(credits * baseCreditValue).toFixed(4)} €`;
