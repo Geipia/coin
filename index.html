@@ -173,12 +173,12 @@
         <div id="slots">
             <div class="slot" id="slot1">🍒</div>
             <div class="slot" id="slot2">🍋</div>
-            <div class="slot" id="slot3">🍊</div>
+            <div class="slot" id="slot3">🍎</div>
         </div>
 
         <div id="result">Clique pour tirer (1 🪙)</div>
         <button onclick="spin()" id="spinButton">Tirer</button>
-        <button onclick="watchAd()" id="adButton">Plus de crédits ? Regarde une pub sur Eraz.ovh (+1 🪙)</button>
+        <button onclick="watchAd()" id="adButton">Regarder la pub (+1 🪙)</button>
     </main>
 
     <button id="infoButton" onclick="toggleSymbolValues()">Symboles & Gains</button>
@@ -218,6 +218,8 @@
         const baseCreditValue = 0.01358;
         let currentCreditValue = baseCreditValue;
         let isSpinning = false;
+        let spinCounter = 0;
+        let adRequired = false;
 
         // Créer une liste pondérée de symboles basée sur la rareté
         let weightedSymbols = [];
@@ -230,8 +232,8 @@
         function updateCredits() {
             creditDisplay.textContent = `${credits} 🪙`;
             popup.textContent = `${credits} 🪙 = ${(credits * currentCreditValue).toFixed(4)} €`;
-            spinBtn.disabled = credits < spinCost || isSpinning;
-            adBtn.style.display = credits < spinCost ? 'block' : 'none';
+            spinBtn.disabled = credits < spinCost || isSpinning || adRequired;
+            adBtn.style.display = adRequired ? 'block' : (credits < spinCost ? 'block' : 'none');
         }
 
         function toggleValuePopup() {
@@ -243,13 +245,13 @@
         }
 
         function spin() {
-            if (credits < spinCost || isSpinning) return;
+            if (credits < spinCost || isSpinning || adRequired) return;
 
             isSpinning = true;
             credits -= spinCost;
             resultEl.textContent = "Tirage en cours... 🎲";
             spinSound.play();
-            spinBtn.disabled = true; // Désactiver pendant le spin
+            spinBtn.disabled = true;
 
             slots.forEach(slot => slot.classList.add("spinning"));
 
@@ -260,12 +262,11 @@
                 let winAmount = 0;
                 for (let i = 0; i < 3; i++) {
                     const randomSymbol = weightedSymbols[Math.floor(Math.random() * weightedSymbols.length)];
-                    slots[i].textContent = randomSymbol; // Toujours afficher un emoji
+                    slots[i].textContent = randomSymbol;
                     result.push(randomSymbol);
                 }
 
                 if (result[0] === result[1] && result[1] === result[2] && result[0] !== "🍎") {
-                    // Jackpot (pas de triple pomme)
                     const winningSymbolConfig = symbolsConfig.find(item => item.symbol === result[0]);
                     if (winningSymbolConfig) {
                         winAmount = winningSymbolConfig.value * 10;
@@ -276,7 +277,6 @@
                         loseSound.play();
                     }
                 } else if ((result[0] === result[1] || result[1] === result[2] || result[0] === result[2]) && !result.includes("🍎")) {
-                    // Double (pas de double pomme)
                     const matchingSymbol = result[0] === result[1] ? result[0] : (result[1] === result[2] ? result[1] : (result[0] === result[2] ? result[0] : null));
                     if (matchingSymbol) {
                         const matchingSymbolConfig = symbolsConfig.find(item => item.symbol === matchingSymbol);
@@ -299,18 +299,28 @@
 
                 credits += winAmount;
                 isSpinning = false;
-                updateCredits(); // Mise à jour de l'affichage
+                spinCounter++;
+                if (spinCounter >= 10) {
+                    adRequired = true;
+                    spinCounter = 0;
+                }
+                updateCredits();
             }, 1500);
         }
 
         function watchAd() {
-            // Redirection vers le site de publicité
-            window.location.href = "http://eraz.ovh";
-            // Pour une implémentation réelle, il faudrait gérer le retour et la récompense côté serveur.
+            if (adRequired) {
+                console.log("Publicité visualisée.");
+                adRequired = false;
+                credits += 1;
+                updateCredits();
+            } else {
+                window.location.href = "http://eraz.ovh";
+            }
         }
 
         // Remplir le popup des valeurs des symboles au chargement
-        symbolValuesDiv.innerHTML = "<h3>Valeurs des Symboles et Gains:</h3>"; // Réinitialiser le contenu
+        symbolValuesDiv.innerHTML = "<h3>Valeurs des Symboles et Gains:</h3>";
         symbolsConfig.forEach(item => {
             const symbolInfo = document.createElement('p');
             const tripleWin = item.symbol === "🍎" ? "0" : `+${item.value * 10}`;
@@ -321,14 +331,13 @@
                                    (Rareté: ${item.rarity})`;
             symbolValuesDiv.appendChild(symbolInfo);
         });
-        // Ajouter une mention spéciale pour la pomme
         const appleInfo = document.createElement('p');
         appleInfo.innerHTML = `<strong>🍎 Pomme</strong> : 0 🪙<br>(Rareté: ${symbolsConfig.find(s => s.symbol === "🍎").rarity})`;
         symbolValuesDiv.appendChild(appleInfo);
 
         // Initialisation de la valeur en euros
         popup.textContent = `${credits} 🪙 = ${(credits * baseCreditValue).toFixed(4)} €`;
-        updateCredits(); // Initialiser l'affichage
+        updateCredits();
     </script>
 </body>
 </html>
