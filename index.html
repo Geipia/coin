@@ -1,4 +1,197 @@
-const symbolsConfig = [
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Machine à Sous Deluxe</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a1a, #333);
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            background: #222;
+            border: 2px solid gold;
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-size: 1.3em;
+            color: gold;
+            box-shadow: 0 0 15px gold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        header:hover {
+            transform: scale(1.05);
+        }
+
+        .credit-value {
+            display: none;
+            position: fixed;
+            top: 70px;
+            left: 20px;
+            background: #333;
+            color: #fff;
+            border: 1px solid gold;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 1em;
+            z-index: 1000;
+        }
+
+        main {
+            text-align: center;
+            padding-top: 100px; /* Ajustement pour le nouveau bouton */
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            color: gold;
+            text-shadow: 2px 2px #000;
+        }
+
+        #slots {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .slot {
+            width: 90px;
+            height: 90px;
+            background: #222;
+            border: 4px solid gold;
+            border-radius: 12px;
+            font-size: 2.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px gold;
+            transition: transform 0.2s;
+        }
+
+        .spinning {
+            animation: spin 0.5s infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotateX(0deg); }
+            50% { transform: rotateX(180deg); }
+            100% { transform: rotateX(360deg); }
+        }
+
+        #result {
+            font-size: 1.3em;
+            margin: 15px;
+        }
+
+        button {
+            font-size: 1.5em;
+            padding: 10px 30px;
+            margin-top: 10px;
+            background: linear-gradient(to right, #f90, #fa0);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 0 10px #f90;
+        }
+
+        button:disabled {
+            background: gray;
+            cursor: not-allowed;
+        }
+
+        #adButton {
+            font-size: 1em;
+            padding: 8px 15px;
+            margin-top: 10px;
+            background-color: #ff6b6b; /* Couleur rouge pour l'urgence */
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 0 5px #ff6b6b;
+            display: none; /* Initialement caché */
+        }
+
+        #adButton:hover {
+            background-color: #e04f4f;
+        }
+
+        #infoButton {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            background: #333;
+            border: 1px solid gold;
+            border-radius: 8px;
+            padding: 8px 15px;
+            font-size: 0.9em;
+            color: gold;
+            cursor: pointer;
+            box-shadow: 0 0 10px gold;
+            transition: transform 0.2s;
+        }
+
+        #infoButton:hover {
+            transform: scale(1.05);
+        }
+
+        #symbolValues {
+            display: none;
+            position: fixed;
+            bottom: 60px;
+            left: 20px;
+            background: #444;
+            color: #fff;
+            border: 1px solid gold;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1em;
+            z-index: 1001;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <header onclick="toggleValuePopup()">
+        <span id="creditAmount">10 🪙</span>
+    </header>
+    <div class="credit-value" id="creditPopup">10 🪙 = 0.1358 €</div>
+
+    <main>
+        <h1>🎰 Machine à Sous Deluxe</h1>
+        <div id="slots">
+            <div class="slot" id="slot1">🍒</div>
+            <div class="slot" id="slot2">🍋</div>
+            <div class="slot" id="slot3">🍊</div>
+        </div>
+
+        <div id="result">Clique pour tirer (1 🪙)</div>
+        <button onclick="spin()" id="spinButton">Tirer</button>
+        <button onclick="watchAd()" id="adButton">Plus de crédits ? Regarde une pub sur Eraz.ovh (+1 🪙)</button>
+    </main>
+
+    <button id="infoButton" onclick="toggleSymbolValues()">Symboles & Gains</button>
+    <div id="symbolValues">
+        <h3>Valeurs des Symboles et Gains:</h3>
+    </div>
+
+    <audio id="spinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.wav"></audio>
+    <audio id="winSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-notification-2018.wav"></audio>
+    <audio id="loseSound" src="https://assets.mixkit.co/sfx/preview/mixkit-retro-arcade-lose-2027.wav"></audio>
+
+    <script>
+        const symbolsConfig = [
             { symbol: "🍒", value: 1, rarity: 40 },
             { symbol: "🍋", value: 2, rarity: 35 },
             { symbol: "🍎", value: 0, rarity: 75 },
@@ -22,7 +215,7 @@ const symbolsConfig = [
 
         let credits = 10;
         const spinCost = 1;
-        const baseCreditValue = 0.01358; // Nouvelle valeur du coin
+        const baseCreditValue = 0.01358;
         let currentCreditValue = baseCreditValue;
         let isSpinning = false;
 
