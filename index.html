@@ -236,18 +236,18 @@
         });
 
         function updateLocalStorage() {
-            localStorage.setItem('credits', credits);
-            localStorage.setItem('spinCounter', spinCounter);
-            localStorage.setItem('adRequired', adRequired);
-        }
+    localStorage.setItem('credits', credits);
+    localStorage.setItem('spinCounter', spinCounter);
+    localStorage.setItem('adRequired', adRequired);
+}
 
-        function updateCredits() {
-            creditDisplay.textContent = `${credits} 🪙`;
-            popup.textContent = `${credits} 🪙 = ${(credits * currentCreditValue).toFixed(4)} €`;
-            spinBtn.disabled = credits < spinCost || isSpinning || adRequired;
-            adBtn.style.display = adRequired ? 'block' : (credits < spinCost ? 'block' : 'none');
-            updateLocalStorage(); // Sauvegarder l'état
-        }
+function updateCredits() {
+    creditDisplay.textContent = `${credits} 🪙`;
+    popup.textContent = `${credits} 🪙 = ${(credits * currentCreditValue).toFixed(4)} €`;
+    spinBtn.disabled = credits < spinCost || isSpinning || adRequired;
+    adBtn.style.display = adRequired ? 'block' : (credits < spinCost ? 'block' : 'none');
+    updateLocalStorage(); // Sauvegarder l'état, y compris les crédits
+}
 
         function toggleValuePopup() {
             popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
