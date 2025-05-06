@@ -192,13 +192,13 @@
 
     <script>
         const symbolsConfig = [
-            { symbol: "🍎", rarity: 75 },
-            { symbol: "🍒", value: 1, rarity: 20 }, // Encore plus fréquent
-            { symbol: "🍋", value: 2, rarity: 15 },
-            { symbol: "🍊", value: 3, rarity: 10 },
-            { symbol: "🔔", value: 5, rarity: 5 },
-            { symbol: "⭐", value: 8, rarity: 3 },   // Encore plus rare
-            { symbol: "💎", value: 12, rarity: 1 }   // Reste très rare
+            { symbol: "🍒", value: 1, rarity: 40 }, // Encore plus fréquent
+            { symbol: "🍋", value: 2, rarity: 35 },
+            { symbol: "🍎", value: 0, rarity: 75 }, // Pomme qui ne rapporte rien, très fréquente
+            { symbol: "🍊", value: 3, rarity: 25 },
+            { symbol: "🔔", value: 5, rarity: 15 },
+            { symbol: "⭐", value: 8, rarity: 8 },
+            { symbol: "💎", value: 12, rarity: 2 }   // Reste très rare
         ];
 
         const slots = [document.getElementById("slot1"), document.getElementById("slot2"), document.getElementById("slot3")];
@@ -214,7 +214,7 @@
         const symbolValuesDiv = document.getElementById("symbolValues");
 
         let credits = 10;
-        const spinCost = 2;
+        const spinCost = 1;
         const baseCreditValue = 0.01358;
         let currentCreditValue = baseCreditValue;
         let isSpinning = false;
@@ -264,19 +264,19 @@
                     result.push(randomSymbol);
                 }
 
-                if (result[0] === result[1] && result[1] === result[2]) {
-                    // Jackpot
+                if (result[0] === result[1] && result[1] === result[2] && result[0] !== "🍎") {
+                    // Jackpot (pas de triple pomme)
                     const winningSymbolConfig = symbolsConfig.find(item => item.symbol === result[0]);
                     if (winningSymbolConfig) {
                         winAmount = winningSymbolConfig.value * 10;
                         resultEl.textContent = `🎉 TRIPLE ${result[0]} ! Tu gagnes +${winAmount} 🪙 !`;
                         winSound.play();
                     } else {
-                        resultEl.textContent = `❌ Rien gagné.`;
+                        resultEl.textContent = `Bla...`;
                         loseSound.play();
                     }
-                } else if (result[0] === result[1] || result[1] === result[2] || result[0] === result[2]) {
-                    // Double
+                } else if ((result[0] === result[1] || result[1] === result[2] || result[0] === result[2]) && !result.includes("🍎")) {
+                    // Double (pas de double pomme)
                     const matchingSymbol = result[0] === result[1] ? result[0] : (result[1] === result[2] ? result[1] : (result[0] === result[2] ? result[0] : null));
                     if (matchingSymbol) {
                         const matchingSymbolConfig = symbolsConfig.find(item => item.symbol === matchingSymbol);
@@ -285,15 +285,15 @@
                             resultEl.textContent = `✨ DOUBLE ${matchingSymbol} ! Tu gagnes +${winAmount} 🪙`;
                             winSound.play();
                         } else {
-                            resultEl.textContent = `❌ Rien gagné.`;
+                            resultEl.textContent = `Bla...`;
                             loseSound.play();
                         }
                     } else {
-                        resultEl.textContent = `❌ Rien gagné.`;
+                        resultEl.textContent = `Bla...`;
                         loseSound.play();
                     }
                 } else {
-                    resultEl.textContent = `❌ Rien gagné.`;
+                    resultEl.textContent = `Bla...`;
                     loseSound.play();
                 }
 
@@ -314,11 +314,15 @@
         symbolsConfig.forEach(item => {
             const symbolInfo = document.createElement('p');
             symbolInfo.innerHTML = `<strong>${item.symbol}</strong> : ${item.value} 🪙<br>
-                                   Triple: +${item.value * 10} 🪙<br>
-                                   Double: +${item.value * 2} 🪙<br>
+                                   Triple: +${item.value * 10} 🪙 (sauf 🍎)<br>
+                                   Double: +${item.value * 2} 🪙 (sauf 🍎)<br>
                                    (Rareté: ${item.rarity})`;
             symbolValuesDiv.appendChild(symbolInfo);
         });
+        // Ajouter une mention spéciale pour la pomme
+        const appleInfo = document.createElement('p');
+        appleInfo.innerHTML = `<strong>🍎 Pomme</strong> : 0 🪙<br>(Rareté: ${symbolsConfig.find(s => s.symbol === "🍎").rarity})`;
+        symbolValuesDiv.appendChild(appleInfo);
 
         // Initialisation de la valeur en euros
         popup.textContent = `${credits} 🪙 = ${(credits * baseCreditValue).toFixed(4)} €`;
