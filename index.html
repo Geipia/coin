@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Machine à Sous Deluxe</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a1a, #333);
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            background: #222;
+            border: 2px solid gold;
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-size: 1.3em;
+            color: gold;
+            box-shadow: 0 0 15px gold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        header:hover {
+            transform: scale(1.05);
+        }
+
+        .credit-value {
+            display: none;
+            position: fixed;
+            top: 70px;
+            left: 20px;
+            background: #333;
+            color: #fff;
+            border: 1px solid gold;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 1em;
+            z-index: 1000;
+        }
+
+        main {
+            text-align: center;
+            padding-top: 100px; /* Ajustement pour le nouveau bouton */
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            color: gold;
+            text-shadow: 2px 2px #000;
+        }
+
+        #slots {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .slot {
+            width: 90px;
+            height: 90px;
+            background: #222;
+            border: 4px solid gold;
+            border-radius: 12px;
+            font-size: 2.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px gold;
+            transition: transform 0.2s;
+        }
+
+        .spinning {
+            animation: spin 0.5s infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotateX(0deg); }
+            50% { transform: rotateX(180deg); }
+            100% { transform: rotateX(360deg); }
+        }
+
+        #result {
+            font-size: 1.3em;
+            margin: 15px;
+        }
+
+        button {
+            font-size: 1.5em;
+            padding: 10px 30px;
+            margin-top: 10px;
+            background: linear-gradient(to right, #f90, #fa0);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 0 10px #f90;
+        }
+
+        button:disabled {
+            background: gray;
+            cursor: not-allowed;
+        }
+
+        #adButton {
+            font-size: 1em;
+            padding: 8px 15px;
+            margin-top: 10px;
+            background-color: #ff6b6b; /* Couleur rouge pour l'urgence */
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 0 5px #ff6b6b;
+            display: none; /* Initialement caché */
+        }
+
+        #adButton:hover {
+            background-color: #e04f4f;
+        }
+
+        #infoButton {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            background: #333;
+            border: 1px solid gold;
+            border-radius: 8px;
+            padding: 8px 15px;
+            font-size: 0.9em;
+            color: gold;
+            cursor: pointer;
+            box-shadow: 0 0 10px gold;
+            transition: transform 0.2s;
+        }
+
+        #infoButton:hover {
+            transform: scale(1.05);
+        }
+
+        #symbolValues {
+            display: none;
+            position: fixed;
+            bottom: 60px;
+            left: 20px;
+            background: #444;
+            color: #fff;
+            border: 1px solid gold;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1em;
+            z-index: 1001;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <header onclick="toggleValuePopup()">
+        <span id="creditAmount">10 🪙</span>
+    </header>
+    <div class="credit-value" id="creditPopup">10 🪙 = 0.1000 €</div>
+
+    <main>
+        <h1>🎰 Machine à Sous Deluxe</h1>
+        <div id="slots">
+            <div class="slot" id="slot1">🍒</div>
+            <div class="slot" id="slot2">🍋</div>
+            <div class="slot" id="slot3">🍊</div>
+        </div>
+
+        <div id="result">Clique pour tirer (1 🪙)</div>
+        <button onclick="spin()" id="spinButton">Tirer</button>
+        <button onclick="watchAd()" id="adButton">Plus de crédits ? Regarde une pub sur Eraz.ovh (+1 🪙)</button>
+    </main>
+
+    <button id="infoButton" onclick="toggleSymbolValues()">Symboles & Gains</button>
+    <div id="symbolValues">
+        <h3>Valeurs des Symboles et Gains:</h3>
+    </div>
+
+    <audio id="spinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.wav"></audio>
+    <audio id="winSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-notification-2018.wav"></audio>
+    <audio id="loseSound" src="https://assets.mixkit.co/sfx/preview/mixkit-retro-arcade-lose-2027.wav"></audio>
+
+    <script>
+        const symbolsConfig = [
+            { symbol: "🍒", value: 1, rarity: 25 },
+            { symbol: "🍋", value: 2, rarity: 20 },
+            { symbol: "🍊", value: 3, rarity: 15 },
+            { symbol: "🔔", value: 5, rarity: 10 },
+            { symbol: "⭐", value: 8, rarity: 5 },
+            { symbol: "💎", value: 12, rarity: 2 }
+        ];
+
+        const slots = [document.getElementById("slot1"), document.getElementById("slot2"), document.getElementById("slot3")];
+        const resultEl = document.getElementById("result");
+        const creditDisplay = document.getElementById("creditAmount");
+        const popup = document.getElementById("creditPopup");
+        const spinSound = document.getElementById("spinSound");
+        const winSound = document.getElementById("winSound");
+        const loseSound = document.getElementById("loseSound");
+        const spinBtn = document.getElementById("spinButton");
+        const adBtn = document.getElementById("adButton");
+        const infoBtn = document.getElementById("infoButton");
+        const symbolValuesDiv = document.getElementById("symbolValues");
+
+        let credits = 10;
+        const spinCost = 1;
+        const baseCreditValue = 0.0100;
+        let currentCreditValue = baseCreditValue;
+        let isSpinning = false;
+
+        // Créer une liste pondérée de symboles basée sur la rareté
+        let weightedSymbols = [];
+        symbolsConfig.forEach(item => {
+            for (let i = 0; i < item.rarity; i++) {
+                weightedSymbols.push(item.symbol);
+            }
+        });
+
+        function updateCredits() {
+            creditDisplay.textContent = `${credits} 🪙`;
+            popup.textContent = `${credits} 🪙 = ${(credits * currentCreditValue).toFixed(4)} €`;
+            spinBtn.disabled = credits < spinCost || isSpinning;
+            adBtn.style.display = credits < spinCost ? 'block' : 'none';
+        }
+
+        function toggleValuePopup() {
+            popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function toggleSymbolValues() {
+            symbolValuesDiv.style.display = symbolValuesDiv.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function spin() {
+            if (credits < spinCost || isSpinning) return;
+
+            isSpinning = true;
+            credits -= spinCost;
+            resultEl.textContent = "Tirage en cours... 🎲";
+            spinSound.play();
+            spinBtn.disabled = true; // Désactiver pendant le spin
+
+            slots.forEach(slot => slot.classList.add("spinning"));
+
+            setTimeout(() => {
+                slots.forEach(slot => slot.classList.remove("spinning"));
+
+                const result = [];
+                let winAmount = 0;
+                for (let i = 0; i < 3; i++) {
+                    const randomSymbol = weightedSymbols[Math.floor(Math.random() * weightedSymbols.length)];
+                    slots[i].textContent = randomSymbol; // Toujours afficher un emoji
+                    result.push(randomSymbol);
+                }
+
+                if (result[0] === result[1] && result[1] === result[2]) {
+                    // Jackpot
+                    const winningSymbolConfig = symbolsConfig.find(item => item.symbol === result[0]);
+                    if (winningSymbolConfig) {
+                        winAmount = winningSymbolConfig.value * 10;
+                        resultEl.textContent = `🎉 TRIPLE ${result[0]} ! Tu gagnes +${winAmount} 🪙 !`;
+                        winSound.play();
+                    } else {
+                        resultEl.textContent = `❌ Rien gagné.`;
+                        loseSound.play();
+                    }
+                } else if (result[0] === result[1] || result[1] === result[2] || result[0] === result[2]) {
+                    // Double
+                    const matchingSymbol = result[0] === result[1] ? result[0] : (result[1] === result[2] ? result[1] : (result[0] === result[2] ? result[0] : null));
+                    if (matchingSymbol) {
+                        const matchingSymbolConfig = symbolsConfig.find(item => item.symbol === matchingSymbol);
+                        if (matchingSymbolConfig) {
+                            winAmount = matchingSymbolConfig.value * 2;
+                            resultEl.textContent = `✨ DOUBLE ${matchingSymbol} ! Tu gagnes +${winAmount} 🪙`;
+                            winSound.play();
+                        } else {
+                            resultEl.textContent = `❌ Rien gagné.`;
+                            loseSound.play();
+                        }
+                    } else {
+                        resultEl.textContent = `❌ Rien gagné.`;
+                        loseSound.play();
+                    }
+                } else {
+                    resultEl.textContent = `❌ Rien gagné.`;
+                    loseSound.play();
+                }
+
+                credits += winAmount;
+                isSpinning = false;
+                updateCredits(); // Mise à jour de l'affichage
+            }, 1500);
+        }
+
+        function watchAd() {
+            // Redirection vers le site de publicité
+            window.location.href = "http://eraz.ovh";
+            // Pour une implémentation réelle, il faudrait gérer le retour et la récompense côté serveur.
+        }
+
+        // Remplir le popup des valeurs des symboles au chargement
+        symbolValuesDiv.innerHTML = "<h3>Valeurs des Symboles et Gains:</h3>"; // Réinitialiser le contenu
+        symbolsConfig.forEach(item => {
+            const symbolInfo = document.createElement('p');
+            symbolInfo.innerHTML = `<strong>${item.symbol}</strong> : ${item.value} 🪙<br>
+                                   Triple: +${item.value * 10} 🪙<br>
+                                   Double: +${item.value * 2} 🪙<br>
+                                   (Rareté: ${item.rarity})`;
+            symbolValuesDiv.appendChild(symbolInfo);
+        });
+
+        // Initialisation de la valeur en euros
+        popup.textContent = `${credits} 🪙 = ${(credits * baseCreditValue).toFixed(4)} €`;
+        updateCredits(); // Initialiser l'affichage
+    </script>
+</body>
+</html>
