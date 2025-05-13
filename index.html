@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -131,11 +131,11 @@
     </div>
     <div id="result">Clique pour tirer (1 🪙)</div>
     <button onclick="prepareSpin()" id="spinButton">Tirer</button>
-    <button onclick="watchBigAd()" id="bigAdButton">Regarder une pub 30s (+5 🪙)</button>
   </main>
   <div id="fixedButtons">
     <button onclick="toggleSymbolValues()">Symboles & Gains</button>
     <button onclick="showWithdrawForm()" id="withdrawButton" disabled>Retirer l’argent (1000🪙 min)</button>
+    <button onclick="watchBigAd()" id="bigAdButton">Regarder une pub 30s (+5 🪙)</button>
   </div>
   <div id="symbolValues"><h3>Valeurs des Symboles :</h3></div>
   <div id="withdrawForm">
@@ -293,7 +293,4 @@
   </script>
 </body>
 </html>
-"""
 
-from IPython.display import HTML
-HTML(html_code)
