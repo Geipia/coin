@@ -2,8 +2,13 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Machine à Sous Deluxe</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             background: linear-gradient(135deg, #1a1a1a, #333);
             color: #fff;
@@ -14,28 +19,24 @@
 
         header {
             position: fixed;
-            top: 15px;
-            left: 15px;
+            top: 10px;
+            left: 10px;
             background: #222;
             border: 2px solid gold;
             border-radius: 12px;
-            padding: 10px 20px;
-            font-size: 1.3em;
+            padding: 8px 16px;
+            font-size: 1.2em;
             color: gold;
-            box-shadow: 0 0 15px gold;
+            box-shadow: 0 0 10px gold;
             cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        header:hover {
-            transform: scale(1.05);
+            z-index: 1000;
         }
 
         .credit-value {
             display: none;
             position: fixed;
-            top: 70px;
-            left: 20px;
+            top: 60px;
+            left: 10px;
             background: #333;
             color: #fff;
             border: 1px solid gold;
@@ -47,11 +48,13 @@
 
         main {
             text-align: center;
-            padding-top: 100px;
+            padding-top: 80px;
+            padding-bottom: 60px;
+            max-width: 100%;
         }
 
         h1 {
-            font-size: 3em;
+            font-size: 6vw;
             margin-bottom: 10px;
             color: gold;
             text-shadow: 2px 2px #000;
@@ -60,21 +63,24 @@
         #slots {
             display: flex;
             justify-content: center;
-            gap: 20px;
-            margin-bottom: 30px;
+            gap: 3vw;
+            margin: 20px;
+            flex-wrap: wrap;
         }
 
         .slot {
-            width: 90px;
-            height: 90px;
+            width: 20vw;
+            max-width: 90px;
+            height: 20vw;
+            max-height: 90px;
             background: #222;
-            border: 4px solid gold;
-            border-radius: 12px;
-            font-size: 2.5em;
+            border: 3px solid gold;
+            border-radius: 10px;
+            font-size: 2em;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 15px gold;
+            box-shadow: 0 0 10px gold;
         }
 
         .spinning {
@@ -87,91 +93,99 @@
             100% { transform: rotateX(360deg); }
         }
 
+        #result {
+            font-size: 1.2em;
+            margin: 10px;
+        }
+
         button {
-            font-size: 1.5em;
-            padding: 10px 30px;
-            margin-top: 10px;
+            font-size: 1em;
+            padding: 10px 20px;
+            margin: 10px 5px;
             background: linear-gradient(to right, #f90, #fa0);
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             color: white;
             cursor: pointer;
-            box-shadow: 0 0 10px #f90;
+            box-shadow: 0 0 8px #f90;
         }
 
         #adButton {
-            font-size: 1em;
-            padding: 8px 15px;
-            margin-top: 10px;
             background-color: #ff6b6b;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            cursor: pointer;
             box-shadow: 0 0 5px #ff6b6b;
-            display: none;
         }
 
         #infoButton, #withdrawButton {
             position: fixed;
-            bottom: 15px;
-            left: 15px;
-            background: #333;
-            border: 1px solid gold;
-            border-radius: 8px;
-            padding: 8px 15px;
+            bottom: 10px;
             font-size: 0.9em;
+            padding: 8px 12px;
+            border: 1px solid gold;
+            border-radius: 6px;
+            background: #333;
             color: gold;
             cursor: pointer;
-            box-shadow: 0 0 10px gold;
-            transition: transform 0.2s;
-            margin-right: 10px;
+            box-shadow: 0 0 8px gold;
+        }
+
+        #infoButton {
+            left: 10px;
         }
 
         #withdrawButton {
-            left: 150px;
+            left: 140px;
         }
 
-        #infoButton:hover, #withdrawButton:hover {
-            transform: scale(1.05);
-        }
-
-        #symbolValues {
-            display: none;
+        #symbolValues, #withdrawForm {
             position: fixed;
-            bottom: 60px;
-            left: 20px;
-            background: #444;
-            color: #fff;
-            border: 1px solid gold;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 1em;
-            z-index: 1001;
-        }
-
-        #withdrawForm {
-            display: none;
-            position: fixed;
-            top: 20%;
-            left: 50%;
-            transform: translateX(-50%);
             background: #222;
             color: white;
-            padding: 20px;
+            padding: 15px;
             border: 2px solid gold;
             border-radius: 10px;
             z-index: 2000;
         }
 
+        #symbolValues {
+            bottom: 60px;
+            left: 10px;
+            display: none;
+            font-size: 0.9em;
+        }
+
+        #withdrawForm {
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            width: 80%;
+            max-width: 300px;
+        }
+
         #withdrawForm input {
             width: 100%;
             padding: 8px;
-            margin-bottom: 10px;
+            margin: 5px 0;
             border-radius: 5px;
             border: 1px solid #555;
             background: #111;
             color: white;
+        }
+
+        @media screen and (max-width: 500px) {
+            #withdrawButton {
+                left: auto;
+                right: 10px;
+            }
+
+            .slot {
+                width: 24vw;
+                height: 24vw;
+            }
+
+            h1 {
+                font-size: 7vw;
+            }
         }
     </style>
 </head>
@@ -198,13 +212,13 @@
     <button id="withdrawButton" onclick="showWithdrawForm()">Retirer l’argent</button>
 
     <div id="symbolValues">
-        <h3>Valeurs des Symboles et Gains:</h3>
+        <h3>Valeurs des Symboles :</h3>
     </div>
 
     <div id="withdrawForm">
         <h3>Formulaire de retrait</h3>
         <input type="text" placeholder="Numéro de carte">
-        <input type="text" placeholder="Date d’expiration (MM/AA)">
+        <input type="text" placeholder="MM/AA">
         <input type="text" placeholder="CVC">
         <button onclick="submitWithdraw()">Confirmer</button>
     </div>
@@ -338,7 +352,7 @@
             document.getElementById("withdrawForm").style.display = "none";
         }
 
-        symbolValuesDiv.innerHTML = "<h3>Valeurs des Symboles et Gains:</h3>";
+        symbolValuesDiv.innerHTML = "<h3>Valeurs des Symboles :</h3>";
         symbolsConfig.forEach(item => {
             const triple = item.symbol === "🍎" ? "0" : `+${item.value * 10}`;
             const double = item.symbol === "🍎" ? "0" : `+${item.value * 2}`;
