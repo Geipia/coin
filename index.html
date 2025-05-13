@@ -1,20 +1,19 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Machine à Sous Deluxe</title>
   <style>
     * {
       box-sizing: border-box;
     }
-
     body {
-      background: linear-gradient(135deg, #1a1a1a, #333);
-      color: #fff;
-      font-family: 'Segoe UI', sans-serif;
       margin: 0;
       padding: 0;
+      background: linear-gradient(135deg, #1a1a1a, #333);
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
     }
 
     header {
@@ -50,7 +49,6 @@
       text-align: center;
       padding-top: 80px;
       padding-bottom: 60px;
-      max-width: 100%;
     }
 
     h1 {
@@ -91,11 +89,6 @@
       0% { transform: rotateX(0deg); }
       50% { transform: rotateX(180deg); }
       100% { transform: rotateX(360deg); }
-    }
-
-    #result {
-      font-size: 1.2em;
-      margin: 10px;
     }
 
     button {
@@ -146,7 +139,7 @@
       transform: scale(1.05);
     }
 
-    #symbolValues, #withdrawForm {
+    #symbolValues, #withdrawForm, #adPopup {
       position: fixed;
       background: #222;
       color: white;
@@ -182,15 +175,27 @@
       color: white;
     }
 
-    @media screen and (max-width: 500px) {
-      .slot {
-        width: 24vw;
-        height: 24vw;
-      }
+    #adPopup {
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: none;
+      background: rgba(0, 0, 0, 0.9);
+      font-size: 2em;
+      text-align: center;
+      justify-content: center;
+      align-items: center;
+    }
 
-      h1 {
-        font-size: 7vw;
-      }
+    #adPopup span {
+      color: gold;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
     }
   </style>
 </head>
@@ -224,11 +229,13 @@
 
   <div id="withdrawForm">
     <h3>Formulaire de retrait</h3>
-    <input type="text" placeholder="Numéro de carte">
-    <input type="text" placeholder="MM/AA">
-    <input type="text" placeholder="CVC">
+    <input type="text" placeholder="Numéro de carte" />
+    <input type="text" placeholder="MM/AA" />
+    <input type="text" placeholder="CVC" />
     <button onclick="submitWithdraw()">Confirmer</button>
   </div>
+
+  <div id="adPopup"><span>Publicité en cours... (5s)</span></div>
 
   <audio id="spinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.wav"></audio>
   <audio id="winSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-notification-2018.wav"></audio>
@@ -236,13 +243,13 @@
 
   <script>
     const symbolsConfig = [
-      { symbol: "🍒", value: 1, rarity: 40 },
-      { symbol: "🍋", value: 2, rarity: 35 },
-      { symbol: "🍎", value: 0, rarity: 75 },
-      { symbol: "🍊", value: 3, rarity: 25 },
-      { symbol: "🔔", value: 5, rarity: 15 },
-      { symbol: "⭐", value: 8, rarity: 8 },
-      { symbol: "💎", value: 100, rarity: 2 }
+      { symbol: "🍒", value: 2, rarity: 30 },
+      { symbol: "🍋", value: 3, rarity: 20 },
+      { symbol: "🍎", value: 0, rarity: 80 },
+      { symbol: "🍊", value: 5, rarity: 10 },
+      { symbol: "🔔", value: 10, rarity: 5 },
+      { symbol: "⭐", value: 20, rarity: 2 },
+      { symbol: "💎", value: 30, rarity: 1 }
     ];
 
     const slots = [document.getElementById("slot1"), document.getElementById("slot2"), document.getElementById("slot3")];
@@ -256,14 +263,13 @@
     const adBtn = document.getElementById("adButton");
     const withdrawBtn = document.getElementById("withdrawButton");
     const symbolValuesDiv = document.getElementById("symbolValues");
+    const adPopup = document.getElementById("adPopup");
 
     let credits = parseInt(localStorage.getItem('credits')) || 10;
-    const spinCost = 1;
-    const baseCreditValue = 0.01358;
-    let currentCreditValue = baseCreditValue;
-    let isSpinning = false;
     let spinCounter = parseInt(localStorage.getItem('spinCounter')) || 0;
     let adRequired = localStorage.getItem('adRequired') === 'true';
+    const spinCost = 1;
+    const baseCreditValue = 0.01358;
 
     let weightedSymbols = [];
     symbolsConfig.forEach(item => {
@@ -280,8 +286,8 @@
 
     function updateCredits() {
       creditDisplay.textContent = `${credits} 🪙`;
-      popup.textContent = `${credits} 🪙 = ${(credits * currentCreditValue).toFixed(4)} €`;
-      spinBtn.disabled = credits < spinCost || isSpinning || adRequired;
+      popup.textContent = `${credits} 🪙 = ${(credits * baseCreditValue).toFixed(4)} €`;
+      spinBtn.disabled = credits < spinCost || adRequired;
       adBtn.style.display = adRequired || credits < spinCost ? 'block' : 'none';
       withdrawBtn.disabled = credits < 1000;
       updateLocalStorage();
@@ -296,56 +302,58 @@
     }
 
     function spin() {
-      if (credits < spinCost || isSpinning || adRequired) return;
-      isSpinning = true;
+      if (credits < spinCost || adRequired) return;
       credits -= spinCost;
-      resultEl.textContent = "Tirage en cours... 🎲";
       spinSound.play();
+      resultEl.textContent = "Tirage en cours...";
       spinBtn.disabled = true;
 
-      slots.forEach(slot => slot.classList.add("spinning"));
+      slots.forEach(s => s.classList.add("spinning"));
 
       setTimeout(() => {
-        slots.forEach(slot => slot.classList.remove("spinning"));
+        slots.forEach(s => s.classList.remove("spinning"));
         const result = [];
-        let winAmount = 0;
+        let gain = 0;
 
         for (let i = 0; i < 3; i++) {
-          const randomSymbol = weightedSymbols[Math.floor(Math.random() * weightedSymbols.length)];
-          slots[i].textContent = randomSymbol;
-          result.push(randomSymbol);
+          const sym = weightedSymbols[Math.floor(Math.random() * weightedSymbols.length)];
+          slots[i].textContent = sym;
+          result.push(sym);
         }
 
-        if (result[0] === result[1] && result[1] === result[2] && result[0] !== "🍎") {
-          const winConfig = symbolsConfig.find(s => s.symbol === result[0]);
-          winAmount = winConfig.value * 10;
-          resultEl.textContent = `🎉 TRIPLE ${result[0]} ! Tu gagnes +${winAmount} 🪙 !`;
+        const allEqual = result[0] === result[1] && result[1] === result[2];
+        const matchingSymbol = result.find(s => result.filter(x => x === s).length === 2 && s !== "🍎");
+
+        if (allEqual && result[0] !== "🍎") {
+          const conf = symbolsConfig.find(e => e.symbol === result[0]);
+          gain = conf.value * 10;
+          resultEl.textContent = `🎉 TRIPLE ${result[0]} ! Tu gagnes ${gain} 🪙`;
           winSound.play();
-        } else if ((result[0] === result[1] || result[1] === result[2] || result[0] === result[2]) && !result.includes("🍎")) {
-          const match = result.find(s => result.filter(x => x === s).length === 2);
-          const matchConfig = symbolsConfig.find(s => s.symbol === match);
-          winAmount = matchConfig.value * 2;
-          resultEl.textContent = `✨ DOUBLE ${match} ! Tu gagnes +${winAmount} 🪙`;
+        } else if (matchingSymbol) {
+          const conf = symbolsConfig.find(e => e.symbol === matchingSymbol);
+          gain = conf.value * 2;
+          resultEl.textContent = `✨ DOUBLE ${matchingSymbol} ! Tu gagnes ${gain} 🪙`;
           winSound.play();
         } else {
-          resultEl.textContent = `❌ Rien gagné.`;
+          resultEl.textContent = "❌ Rien gagné.";
           loseSound.play();
         }
 
-        credits += winAmount;
-        isSpinning = false;
+        credits += gain;
         spinCounter++;
         if (spinCounter >= 10) {
           adRequired = true;
           spinCounter = 0;
         }
+
         updateCredits();
       }, 1500);
     }
 
     function watchAd() {
-      window.location.href = "http://eraz.ovh";
+      adPopup.style.display = "flex";
       setTimeout(() => {
+        adPopup.style.display = "none";
         credits += 1;
         adRequired = false;
         updateCredits();
@@ -361,15 +369,14 @@
     }
 
     function submitWithdraw() {
-      alert("Votre demande a été enregistrée.");
+      alert("Demande enregistrée.");
       document.getElementById("withdrawForm").style.display = "none";
     }
 
-    symbolValuesDiv.innerHTML = "<h3>Valeurs des Symboles :</h3>";
     symbolsConfig.forEach(item => {
       const triple = item.symbol === "🍎" ? "0" : `+${item.value * 10}`;
       const double = item.symbol === "🍎" ? "0" : `+${item.value * 2}`;
-      const p = document.createElement('p');
+      const p = document.createElement("p");
       p.innerHTML = `<strong>${item.symbol}</strong> : ${item.value} 🪙<br>Triple: ${triple}<br>Double: ${double}<br>(Rareté: ${item.rarity})`;
       symbolValuesDiv.appendChild(p);
     });
