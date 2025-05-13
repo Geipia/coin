@@ -1,386 +1,380 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Machine à Sous Deluxe</title>
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Machine à Sous Deluxe</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-        body {
-            background: linear-gradient(135deg, #1a1a1a, #333);
-            color: #fff;
-            font-family: 'Segoe UI', sans-serif;
-            margin: 0;
-            padding: 0;
-        }
+    body {
+      background: linear-gradient(135deg, #1a1a1a, #333);
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
 
-        header {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            background: #222;
-            border: 2px solid gold;
-            border-radius: 12px;
-            padding: 8px 16px;
-            font-size: 1.2em;
-            color: gold;
-            box-shadow: 0 0 10px gold;
-            cursor: pointer;
-            z-index: 1000;
-        }
+    header {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: #222;
+      border: 2px solid gold;
+      border-radius: 12px;
+      padding: 8px 16px;
+      font-size: 1.2em;
+      color: gold;
+      box-shadow: 0 0 10px gold;
+      cursor: pointer;
+      z-index: 1000;
+    }
 
-        .credit-value {
-            display: none;
-            position: fixed;
-            top: 60px;
-            left: 10px;
-            background: #333;
-            color: #fff;
-            border: 1px solid gold;
-            padding: 10px;
-            border-radius: 10px;
-            font-size: 1em;
-            z-index: 1000;
-        }
+    .credit-value {
+      display: none;
+      position: fixed;
+      top: 60px;
+      left: 10px;
+      background: #333;
+      color: #fff;
+      border: 1px solid gold;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 1em;
+      z-index: 1000;
+    }
 
-        main {
-            text-align: center;
-            padding-top: 80px;
-            padding-bottom: 60px;
-            max-width: 100%;
-        }
+    main {
+      text-align: center;
+      padding-top: 80px;
+      padding-bottom: 60px;
+      max-width: 100%;
+    }
 
-        h1 {
-            font-size: 6vw;
-            margin-bottom: 10px;
-            color: gold;
-            text-shadow: 2px 2px #000;
-        }
+    h1 {
+      font-size: 6vw;
+      margin-bottom: 10px;
+      color: gold;
+      text-shadow: 2px 2px #000;
+    }
 
-        #slots {
-            display: flex;
-            justify-content: center;
-            gap: 3vw;
-            margin: 20px;
-            flex-wrap: wrap;
-        }
+    #slots {
+      display: flex;
+      justify-content: center;
+      gap: 3vw;
+      margin: 20px;
+      flex-wrap: wrap;
+    }
 
-        .slot {
-            width: 20vw;
-            max-width: 90px;
-            height: 20vw;
-            max-height: 90px;
-            background: #222;
-            border: 3px solid gold;
-            border-radius: 10px;
-            font-size: 2em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 10px gold;
-        }
+    .slot {
+      width: 20vw;
+      max-width: 90px;
+      height: 20vw;
+      max-height: 90px;
+      background: #222;
+      border: 3px solid gold;
+      border-radius: 10px;
+      font-size: 2em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 10px gold;
+    }
 
-        .spinning {
-            animation: spin 0.5s infinite;
-        }
+    .spinning {
+      animation: spin 0.5s infinite;
+    }
 
-        @keyframes spin {
-            0% { transform: rotateX(0deg); }
-            50% { transform: rotateX(180deg); }
-            100% { transform: rotateX(360deg); }
-        }
+    @keyframes spin {
+      0% { transform: rotateX(0deg); }
+      50% { transform: rotateX(180deg); }
+      100% { transform: rotateX(360deg); }
+    }
 
-        #result {
-            font-size: 1.2em;
-            margin: 10px;
-        }
+    #result {
+      font-size: 1.2em;
+      margin: 10px;
+    }
 
-        button {
-            font-size: 1em;
-            padding: 10px 20px;
-            margin: 10px 5px;
-            background: linear-gradient(to right, #f90, #fa0);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            cursor: pointer;
-            box-shadow: 0 0 8px #f90;
-        }
+    button {
+      font-size: 1em;
+      padding: 10px 20px;
+      margin: 10px 5px;
+      background: linear-gradient(to right, #f90, #fa0);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 0 8px #f90;
+    }
 
-        #adButton {
-            background-color: #ff6b6b;
-            box-shadow: 0 0 5px #ff6b6b;
-        }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
 
-        #infoButton, #withdrawButton {
-            position: fixed;
-            bottom: 10px;
-            font-size: 0.9em;
-            padding: 8px 12px;
-            border: 1px solid gold;
-            border-radius: 6px;
-            background: #333;
-            color: gold;
-            cursor: pointer;
-            box-shadow: 0 0 8px gold;
-        }
+    #adButton {
+      background-color: #ff6b6b;
+      box-shadow: 0 0 5px #ff6b6b;
+    }
 
-        #infoButton {
-            left: 10px;
-        }
+    #fixedButtons {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+    }
 
-        #withdrawButton {
-            left: 140px;
-        }
+    #fixedButtons button {
+      background: #333;
+      border: 1px solid gold;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 0.9em;
+      color: gold;
+      cursor: pointer;
+      box-shadow: 0 0 8px gold;
+      transition: transform 0.2s;
+    }
 
-        #symbolValues, #withdrawForm {
-            position: fixed;
-            background: #222;
-            color: white;
-            padding: 15px;
-            border: 2px solid gold;
-            border-radius: 10px;
-            z-index: 2000;
-        }
+    #fixedButtons button:hover:enabled {
+      transform: scale(1.05);
+    }
 
-        #symbolValues {
-            bottom: 60px;
-            left: 10px;
-            display: none;
-            font-size: 0.9em;
-        }
+    #symbolValues, #withdrawForm {
+      position: fixed;
+      background: #222;
+      color: white;
+      padding: 15px;
+      border: 2px solid gold;
+      border-radius: 10px;
+      z-index: 2000;
+    }
 
-        #withdrawForm {
-            top: 20%;
-            left: 50%;
-            transform: translateX(-50%);
-            display: none;
-            width: 80%;
-            max-width: 300px;
-        }
+    #symbolValues {
+      bottom: 60px;
+      left: 10px;
+      display: none;
+      font-size: 0.9em;
+    }
 
-        #withdrawForm input {
-            width: 100%;
-            padding: 8px;
-            margin: 5px 0;
-            border-radius: 5px;
-            border: 1px solid #555;
-            background: #111;
-            color: white;
-        }
-        
-       button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+    #withdrawForm {
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+      width: 80%;
+      max-width: 300px;
+    }
 
-        @media screen and (max-width: 500px) {
-            #withdrawButton {
-                left: auto;
-                right: 10px;
-            }
+    #withdrawForm input {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 5px;
+      border: 1px solid #555;
+      background: #111;
+      color: white;
+    }
 
-            .slot {
-                width: 24vw;
-                height: 24vw;
-            }
+    @media screen and (max-width: 500px) {
+      .slot {
+        width: 24vw;
+        height: 24vw;
+      }
 
-            h1 {
-                font-size: 7vw;
-            }
-        }
-    </style>
+      h1 {
+        font-size: 7vw;
+      }
+    }
+  </style>
 </head>
 <body>
-    <header onclick="toggleValuePopup()">
-        <span id="creditAmount">10 🪙</span>
-    </header>
-    <div class="credit-value" id="creditPopup">10 🪙 = 0.1358 €</div>
+  <header onclick="toggleValuePopup()">
+    <span id="creditAmount">10 🪙</span>
+  </header>
+  <div class="credit-value" id="creditPopup">10 🪙 = 0.1358 €</div>
 
-    <main>
-        <h1>🎰 Machine à Sous Deluxe</h1>
-        <div id="slots">
-            <div class="slot" id="slot1">🍒</div>
-            <div class="slot" id="slot2">🍋</div>
-            <div class="slot" id="slot3">🍎</div>
-        </div>
+  <main>
+    <h1>🎰 Machine à Sous Deluxe</h1>
+    <div id="slots">
+      <div class="slot" id="slot1">🍒</div>
+      <div class="slot" id="slot2">🍋</div>
+      <div class="slot" id="slot3">🍎</div>
+    </div>
 
-        <div id="result">Clique pour tirer (1 🪙)</div>
-        <button onclick="spin()" id="spinButton">Tirer</button>
-        <button onclick="watchAd()" id="adButton">Regarder la pub (+1 🪙)</button>
-    </main>
+    <div id="result">Clique pour tirer (1 🪙)</div>
+    <button onclick="spin()" id="spinButton">Tirer</button>
+    <button onclick="watchAd()" id="adButton">Regarder la pub (+1 🪙)</button>
+  </main>
 
+  <div id="fixedButtons">
     <button id="infoButton" onclick="toggleSymbolValues()">Symboles & Gains</button>
-    
-    <div>
-        <button id="withdrawButton" onclick="showWithdrawForm()">Retirer l’argent(min 1000 🪙)</button>
-    </div>
-    
-    <div id="symbolValues">
-        <h3>Valeurs des Symboles :</h3>
-    </div>
+    <button id="withdrawButton" onclick="showWithdrawForm()" disabled>Retirer l’argent (1000🪙 min)</button>
+  </div>
 
-    <div id="withdrawForm">
-        <h3>Formulaire de retrait</h3>
-        <input type="text" placeholder="Numéro de carte">
-        <input type="text" placeholder="MM/AA">
-        <input type="text" placeholder="CVC">
-        <button onclick="submitWithdraw()">Confirmer</button>
-    </div>
+  <div id="symbolValues">
+    <h3>Valeurs des Symboles :</h3>
+  </div>
 
-    <audio id="spinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.wav"></audio>
-    <audio id="winSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-notification-2018.wav"></audio>
-    <audio id="loseSound" src="https://assets.mixkit.co/sfx/preview/mixkit-retro-arcade-lose-2027.wav"></audio>
+  <div id="withdrawForm">
+    <h3>Formulaire de retrait</h3>
+    <input type="text" placeholder="Numéro de carte">
+    <input type="text" placeholder="MM/AA">
+    <input type="text" placeholder="CVC">
+    <button onclick="submitWithdraw()">Confirmer</button>
+  </div>
 
-    <script>
-        const symbolsConfig = [
-            { symbol: "🍒", value: 1, rarity: 40 },
-            { symbol: "🍋", value: 2, rarity: 35 },
-            { symbol: "🍎", value: 0, rarity: 75 },
-            { symbol: "🍊", value: 3, rarity: 25 },
-            { symbol: "🔔", value: 5, rarity: 15 },
-            { symbol: "⭐", value: 8, rarity: 8 },
-            { symbol: "💎", value: 12, rarity: 2 }
-        ];
+  <audio id="spinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.wav"></audio>
+  <audio id="winSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-notification-2018.wav"></audio>
+  <audio id="loseSound" src="https://assets.mixkit.co/sfx/preview/mixkit-retro-arcade-lose-2027.wav"></audio>
 
-        const slots = [document.getElementById("slot1"), document.getElementById("slot2"), document.getElementById("slot3")];
-        const resultEl = document.getElementById("result");
-        const creditDisplay = document.getElementById("creditAmount");
-        const popup = document.getElementById("creditPopup");
-        const spinSound = document.getElementById("spinSound");
-        const winSound = document.getElementById("winSound");
-        const loseSound = document.getElementById("loseSound");
-        const spinBtn = document.getElementById("spinButton");
-        const adBtn = document.getElementById("adButton");
-        const symbolValuesDiv = document.getElementById("symbolValues");
+  <script>
+    const symbolsConfig = [
+      { symbol: "🍒", value: 1, rarity: 40 },
+      { symbol: "🍋", value: 2, rarity: 35 },
+      { symbol: "🍎", value: 0, rarity: 75 },
+      { symbol: "🍊", value: 3, rarity: 25 },
+      { symbol: "🔔", value: 5, rarity: 15 },
+      { symbol: "⭐", value: 8, rarity: 8 },
+      { symbol: "💎", value: 12, rarity: 2 }
+    ];
 
-        let credits = parseInt(localStorage.getItem('credits')) || 10;
-        const spinCost = 1;
-        const baseCreditValue = 0.01358;
-        let currentCreditValue = baseCreditValue;
-        let isSpinning = false;
-        let spinCounter = parseInt(localStorage.getItem('spinCounter')) || 0;
-        let adRequired = localStorage.getItem('adRequired') === 'true';
+    const slots = [document.getElementById("slot1"), document.getElementById("slot2"), document.getElementById("slot3")];
+    const resultEl = document.getElementById("result");
+    const creditDisplay = document.getElementById("creditAmount");
+    const popup = document.getElementById("creditPopup");
+    const spinSound = document.getElementById("spinSound");
+    const winSound = document.getElementById("winSound");
+    const loseSound = document.getElementById("loseSound");
+    const spinBtn = document.getElementById("spinButton");
+    const adBtn = document.getElementById("adButton");
+    const withdrawBtn = document.getElementById("withdrawButton");
+    const symbolValuesDiv = document.getElementById("symbolValues");
 
-        let weightedSymbols = [];
-        symbolsConfig.forEach(item => {
-            for (let i = 0; i < item.rarity; i++) {
-                weightedSymbols.push(item.symbol);
-            }
-        });
+    let credits = parseInt(localStorage.getItem('credits')) || 10;
+    const spinCost = 1;
+    const baseCreditValue = 0.01358;
+    let currentCreditValue = baseCreditValue;
+    let isSpinning = false;
+    let spinCounter = parseInt(localStorage.getItem('spinCounter')) || 0;
+    let adRequired = localStorage.getItem('adRequired') === 'true';
 
-        function updateLocalStorage() {
-            localStorage.setItem('credits', credits);
-            localStorage.setItem('spinCounter', spinCounter);
-            localStorage.setItem('adRequired', adRequired);
+    let weightedSymbols = [];
+    symbolsConfig.forEach(item => {
+      for (let i = 0; i < item.rarity; i++) {
+        weightedSymbols.push(item.symbol);
+      }
+    });
+
+    function updateLocalStorage() {
+      localStorage.setItem('credits', credits);
+      localStorage.setItem('spinCounter', spinCounter);
+      localStorage.setItem('adRequired', adRequired);
+    }
+
+    function updateCredits() {
+      creditDisplay.textContent = `${credits} 🪙`;
+      popup.textContent = `${credits} 🪙 = ${(credits * currentCreditValue).toFixed(4)} €`;
+      spinBtn.disabled = credits < spinCost || isSpinning || adRequired;
+      adBtn.style.display = adRequired || credits < spinCost ? 'block' : 'none';
+      withdrawBtn.disabled = credits < 1000;
+      updateLocalStorage();
+    }
+
+    function toggleValuePopup() {
+      popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function toggleSymbolValues() {
+      symbolValuesDiv.style.display = symbolValuesDiv.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function spin() {
+      if (credits < spinCost || isSpinning || adRequired) return;
+      isSpinning = true;
+      credits -= spinCost;
+      resultEl.textContent = "Tirage en cours... 🎲";
+      spinSound.play();
+      spinBtn.disabled = true;
+
+      slots.forEach(slot => slot.classList.add("spinning"));
+
+      setTimeout(() => {
+        slots.forEach(slot => slot.classList.remove("spinning"));
+        const result = [];
+        let winAmount = 0;
+
+        for (let i = 0; i < 3; i++) {
+          const randomSymbol = weightedSymbols[Math.floor(Math.random() * weightedSymbols.length)];
+          slots[i].textContent = randomSymbol;
+          result.push(randomSymbol);
         }
 
-        const withdrawBtn = document.getElementById("withdrawButton");
-
-        function updateCredits() {
-            creditDisplay.textContent = `${credits} 🪙`;
-            popup.textContent = `${credits} 🪙 = ${(credits * currentCreditValue).toFixed(4)} €`;
-            spinBtn.disabled = credits < spinCost || isSpinning || adRequired;
-            adBtn.style.display = adRequired || credits < spinCost ? 'block' : 'none';
-            withdrawBtn.disabled = credits < 1000;
-            updateLocalStorage();
-        }
-        
-        function showWithdrawForm() {
-            if (credits < 1000) {
-                alert("Il faut au moins 1000 🪙 pour effectuer un retrait !");
-                return;
-            }
-            document.getElementById("withdrawForm").style.display = "block";
-        }
-        function toggleValuePopup() {
-            popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+        if (result[0] === result[1] && result[1] === result[2] && result[0] !== "🍎") {
+          const winConfig = symbolsConfig.find(s => s.symbol === result[0]);
+          winAmount = winConfig.value * 10;
+          resultEl.textContent = `🎉 TRIPLE ${result[0]} ! Tu gagnes +${winAmount} 🪙 !`;
+          winSound.play();
+        } else if ((result[0] === result[1] || result[1] === result[2] || result[0] === result[2]) && !result.includes("🍎")) {
+          const match = result.find(s => result.filter(x => x === s).length === 2);
+          const matchConfig = symbolsConfig.find(s => s.symbol === match);
+          winAmount = matchConfig.value * 2;
+          resultEl.textContent = `✨ DOUBLE ${match} ! Tu gagnes +${winAmount} 🪙`;
+          winSound.play();
+        } else {
+          resultEl.textContent = `❌ Rien gagné.`;
+          loseSound.play();
         }
 
-        function toggleSymbolValues() {
-            symbolValuesDiv.style.display = symbolValuesDiv.style.display === 'block' ? 'none' : 'block';
+        credits += winAmount;
+        isSpinning = false;
+        spinCounter++;
+        if (spinCounter >= 10) {
+          adRequired = true;
+          spinCounter = 0;
         }
-
-        function spin() {
-            if (credits < spinCost || isSpinning || adRequired) return;
-            isSpinning = true;
-            credits -= spinCost;
-            resultEl.textContent = "Tirage en cours... 🎲";
-            spinSound.play();
-            spinBtn.disabled = true;
-
-            slots.forEach(slot => slot.classList.add("spinning"));
-
-            setTimeout(() => {
-                slots.forEach(slot => slot.classList.remove("spinning"));
-                const result = [];
-                let winAmount = 0;
-
-                for (let i = 0; i < 3; i++) {
-                    const randomSymbol = weightedSymbols[Math.floor(Math.random() * weightedSymbols.length)];
-                    slots[i].textContent = randomSymbol;
-                    result.push(randomSymbol);
-                }
-
-                if (result[0] === result[1] && result[1] === result[2] && result[0] !== "🍎") {
-                    const winConfig = symbolsConfig.find(s => s.symbol === result[0]);
-                    winAmount = winConfig.value * 10;
-                    resultEl.textContent = `🎉 TRIPLE ${result[0]} ! Tu gagnes +${winAmount} 🪙 !`;
-                    winSound.play();
-                } else if ((result[0] === result[1] || result[1] === result[2] || result[0] === result[2]) && !result.includes("🍎")) {
-                    const match = result.find(s => result.filter(x => x === s).length === 2);
-                    const matchConfig = symbolsConfig.find(s => s.symbol === match);
-                    winAmount = matchConfig.value * 2;
-                    resultEl.textContent = `✨ DOUBLE ${match} ! Tu gagnes +${winAmount} 🪙`;
-                    winSound.play();
-                } else {
-                    resultEl.textContent = `❌ Rien gagné.`;
-                    loseSound.play();
-                }
-
-                credits += winAmount;
-                isSpinning = false;
-                spinCounter++;
-                if (spinCounter >= 10) {
-                    adRequired = true;
-                    spinCounter = 0;
-                }
-                updateCredits();
-            }, 1500);
-        }
-
-        function watchAd() {
-            window.location.href = "http://eraz.ovh";
-            setTimeout(() => {
-                credits += 1;
-                adRequired = false;
-                updateCredits();
-            }, 5000);
-        }
-
-        function showWithdrawForm() {
-            document.getElementById("withdrawForm").style.display = "block";
-        }
-
-        function submitWithdraw() {
-            alert("Votre demande a été enregistrée.");
-            document.getElementById("withdrawForm").style.display = "none";
-        }
-
-        symbolValuesDiv.innerHTML = "<h3>Valeurs des Symboles :</h3>";
-        symbolsConfig.forEach(item => {
-            const triple = item.symbol === "🍎" ? "0" : `+${item.value * 10}`;
-            const double = item.symbol === "🍎" ? "0" : `+${item.value * 2}`;
-            const p = document.createElement('p');
-            p.innerHTML = `<strong>${item.symbol}</strong> : ${item.value} 🪙<br>Triple: ${triple}<br>Double: ${double}<br>(Rareté: ${item.rarity})`;
-            symbolValuesDiv.appendChild(p);
-        });
-
         updateCredits();
-    </script>
+      }, 1500);
+    }
+
+    function watchAd() {
+      window.location.href = "http://eraz.ovh";
+      setTimeout(() => {
+        credits += 1;
+        adRequired = false;
+        updateCredits();
+      }, 5000);
+    }
+
+    function showWithdrawForm() {
+      if (credits < 1000) {
+        alert("Il faut au moins 1000 🪙 pour retirer !");
+        return;
+      }
+      document.getElementById("withdrawForm").style.display = "block";
+    }
+
+    function submitWithdraw() {
+      alert("Votre demande a été enregistrée.");
+      document.getElementById("withdrawForm").style.display = "none";
+    }
+
+    symbolValuesDiv.innerHTML = "<h3>Valeurs des Symboles :</h3>";
+    symbolsConfig.forEach(item => {
+      const triple = item.symbol === "🍎" ? "0" : `+${item.value * 10}`;
+      const double = item.symbol === "🍎" ? "0" : `+${item.value * 2}`;
+      const p = document.createElement('p');
+      p.innerHTML = `<strong>${item.symbol}</strong> : ${item.value} 🪙<br>Triple: ${triple}<br>Double: ${double}<br>(Rareté: ${item.rarity})`;
+      symbolValuesDiv.appendChild(p);
+    });
+
+    updateCredits();
+  </script>
 </body>
 </html>
