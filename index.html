@@ -47,7 +47,7 @@
 
         main {
             text-align: center;
-            padding-top: 100px; /* Ajustement pour le nouveau bouton */
+            padding-top: 100px;
         }
 
         h1 {
@@ -75,7 +75,6 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 0 15px gold;
-            transition: transform 0.2s;
         }
 
         .spinning {
@@ -86,11 +85,6 @@
             0% { transform: rotateX(0deg); }
             50% { transform: rotateX(180deg); }
             100% { transform: rotateX(360deg); }
-        }
-
-        #result {
-            font-size: 1.3em;
-            margin: 15px;
         }
 
         button {
@@ -105,29 +99,20 @@
             box-shadow: 0 0 10px #f90;
         }
 
-        button:disabled {
-            background: gray;
-            cursor: not-allowed;
-        }
-
         #adButton {
             font-size: 1em;
             padding: 8px 15px;
             margin-top: 10px;
-            background-color: #ff6b6b; /* Couleur rouge pour l'urgence */
+            background-color: #ff6b6b;
             border: none;
             border-radius: 5px;
             color: white;
             cursor: pointer;
             box-shadow: 0 0 5px #ff6b6b;
-            display: none; /* Initialement caché */
+            display: none;
         }
 
-        #adButton:hover {
-            background-color: #e04f4f;
-        }
-
-        #infoButton {
+        #infoButton, #withdrawButton {
             position: fixed;
             bottom: 15px;
             left: 15px;
@@ -140,9 +125,14 @@
             cursor: pointer;
             box-shadow: 0 0 10px gold;
             transition: transform 0.2s;
+            margin-right: 10px;
         }
 
-        #infoButton:hover {
+        #withdrawButton {
+            left: 150px;
+        }
+
+        #infoButton:hover, #withdrawButton:hover {
             transform: scale(1.05);
         }
 
@@ -158,7 +148,30 @@
             border-radius: 10px;
             font-size: 1em;
             z-index: 1001;
-            line-height: 1.5;
+        }
+
+        #withdrawForm {
+            display: none;
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #222;
+            color: white;
+            padding: 20px;
+            border: 2px solid gold;
+            border-radius: 10px;
+            z-index: 2000;
+        }
+
+        #withdrawForm input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #555;
+            background: #111;
+            color: white;
         }
     </style>
 </head>
@@ -182,8 +195,18 @@
     </main>
 
     <button id="infoButton" onclick="toggleSymbolValues()">Symboles & Gains</button>
+    <button id="withdrawButton" onclick="showWithdrawForm()">Retirer l’argent</button>
+
     <div id="symbolValues">
         <h3>Valeurs des Symboles et Gains:</h3>
+    </div>
+
+    <div id="withdrawForm">
+        <h3>Formulaire de retrait</h3>
+        <input type="text" placeholder="Numéro de carte">
+        <input type="text" placeholder="Date d’expiration (MM/AA)">
+        <input type="text" placeholder="CVC">
+        <button onclick="submitWithdraw()">Confirmer</button>
     </div>
 
     <audio id="spinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.wav"></audio>
@@ -210,7 +233,6 @@
         const loseSound = document.getElementById("loseSound");
         const spinBtn = document.getElementById("spinButton");
         const adBtn = document.getElementById("adButton");
-        const infoBtn = document.getElementById("infoButton");
         const symbolValuesDiv = document.getElementById("symbolValues");
 
         let credits = parseInt(localStorage.getItem('credits')) || 10;
@@ -219,15 +241,8 @@
         let currentCreditValue = baseCreditValue;
         let isSpinning = false;
         let spinCounter = parseInt(localStorage.getItem('spinCounter')) || 0;
-        let adRequired = false;
+        let adRequired = localStorage.getItem('adRequired') === 'true';
 
-        // Charger l'état de la publicité depuis le localStorage
-        const adRequiredStorage = localStorage.getItem('adRequired');
-        if (adRequiredStorage === 'true') {
-            adRequired = true;
-        }
-
-        // Créer une liste pondérée de symboles basée sur la rareté
         let weightedSymbols = [];
         symbolsConfig.forEach(item => {
             for (let i = 0; i < item.rarity; i++) {
@@ -236,18 +251,18 @@
         });
 
         function updateLocalStorage() {
-    localStorage.setItem('credits', credits);
-    localStorage.setItem('spinCounter', spinCounter);
-    localStorage.setItem('adRequired', adRequired);
-}
+            localStorage.setItem('credits', credits);
+            localStorage.setItem('spinCounter', spinCounter);
+            localStorage.setItem('adRequired', adRequired);
+        }
 
-function updateCredits() {
-    creditDisplay.textContent = `${credits} 🪙`;
-    popup.textContent = `${credits} 🪙 = ${(credits * currentCreditValue).toFixed(4)} €`;
-    spinBtn.disabled = credits < spinCost || isSpinning || adRequired;
-    adBtn.style.display = adRequired ? 'block' : (credits < spinCost ? 'block' : 'none');
-    updateLocalStorage(); // Sauvegarder l'état, y compris les crédits
-}
+        function updateCredits() {
+            creditDisplay.textContent = `${credits} 🪙`;
+            popup.textContent = `${credits} 🪙 = ${(credits * currentCreditValue).toFixed(4)} €`;
+            spinBtn.disabled = credits < spinCost || isSpinning || adRequired;
+            adBtn.style.display = adRequired || credits < spinCost ? 'block' : 'none';
+            updateLocalStorage();
+        }
 
         function toggleValuePopup() {
             popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
@@ -259,7 +274,6 @@ function updateCredits() {
 
         function spin() {
             if (credits < spinCost || isSpinning || adRequired) return;
-
             isSpinning = true;
             credits -= spinCost;
             resultEl.textContent = "Tirage en cours... 🎲";
@@ -270,9 +284,9 @@ function updateCredits() {
 
             setTimeout(() => {
                 slots.forEach(slot => slot.classList.remove("spinning"));
-
                 const result = [];
                 let winAmount = 0;
+
                 for (let i = 0; i < 3; i++) {
                     const randomSymbol = weightedSymbols[Math.floor(Math.random() * weightedSymbols.length)];
                     slots[i].textContent = randomSymbol;
@@ -280,31 +294,16 @@ function updateCredits() {
                 }
 
                 if (result[0] === result[1] && result[1] === result[2] && result[0] !== "🍎") {
-                    const winningSymbolConfig = symbolsConfig.find(item => item.symbol === result[0]);
-                    if (winningSymbolConfig) {
-                        winAmount = winningSymbolConfig.value * 10;
-                        resultEl.textContent = `🎉 TRIPLE ${result[0]} ! Tu gagnes +${winAmount} 🪙 !`;
-                        winSound.play();
-                    } else {
-                        resultEl.textContent = `❌ Rien gagné.`;
-                        loseSound.play();
-                    }
+                    const winConfig = symbolsConfig.find(s => s.symbol === result[0]);
+                    winAmount = winConfig.value * 10;
+                    resultEl.textContent = `🎉 TRIPLE ${result[0]} ! Tu gagnes +${winAmount} 🪙 !`;
+                    winSound.play();
                 } else if ((result[0] === result[1] || result[1] === result[2] || result[0] === result[2]) && !result.includes("🍎")) {
-                    const matchingSymbol = result[0] === result[1] ? result[0] : (result[1] === result[2] ? result[1] : (result[0] === result[2] ? result[0] : null));
-                    if (matchingSymbol) {
-                        const matchingSymbolConfig = symbolsConfig.find(item => item.symbol === matchingSymbol);
-                        if (matchingSymbolConfig) {
-                            winAmount = matchingSymbolConfig.value * 2;
-                            resultEl.textContent = `✨ DOUBLE ${matchingSymbol} ! Tu gagnes +${winAmount} 🪙`;
-                            winSound.play();
-                        } else {
-                            resultEl.textContent = `❌ Rien gagné.`;
-                            loseSound.play();
-                        }
-                    } else {
-                        resultEl.textContent = `❌ Rien gagné.`;
-                        loseSound.play();
-                    }
+                    const match = result.find(s => result.filter(x => x === s).length === 2);
+                    const matchConfig = symbolsConfig.find(s => s.symbol === match);
+                    winAmount = matchConfig.value * 2;
+                    resultEl.textContent = `✨ DOUBLE ${match} ! Tu gagnes +${winAmount} 🪙`;
+                    winSound.play();
                 } else {
                     resultEl.textContent = `❌ Rien gagné.`;
                     loseSound.play();
@@ -322,49 +321,32 @@ function updateCredits() {
         }
 
         function watchAd() {
-            console.log("Bouton de publicité cliqué.");
-            if (adRequired) {
-                console.log("Redirection vers la publicité (obligatoire).");
-                // Redirection vers le site de publicité
-                window.location.href = "http://eraz.ovh";
-                // Dans un scénario réel, le retour depuis la pub et la récompense seraient gérés différemment.
-                // Pour la simulation locale, on pourrait imaginer une gestion après un certain délai.
-                    setTimeout(() => {
-                         adRequired = false;
-                         credits += 1;
-                         updateCredits();
-                     }, 5000); // Simuler un délai de visionnage de 5 secondes
-            } else if (credits < spinCost) {
-                console.log("Redirection vers la publicité (manque de crédits).");
-                window.location.href = "http://eraz.ovh";
-                // Simuler la récompense après la redirection (ce serait géré côté serveur).
-                    setTimeout(() => {
-                         credits += 1;
-                         updateCredits();
-                     }, 5000); // Simuler un délai de visionnage de 5 secondes
-            }
-            // Si la pub n'est pas requise et qu'on a assez de crédits, rien ne se passe en cliquant sur le bouton.
-            // On pourrait éventuellement ajouter un message ou un comportement différent ici.
+            window.location.href = "http://eraz.ovh";
+            setTimeout(() => {
+                credits += 1;
+                adRequired = false;
+                updateCredits();
+            }, 5000);
         }
 
-        // Remplir le popup des valeurs des symboles au chargement
+        function showWithdrawForm() {
+            document.getElementById("withdrawForm").style.display = "block";
+        }
+
+        function submitWithdraw() {
+            alert("Votre demande a été enregistrée.");
+            document.getElementById("withdrawForm").style.display = "none";
+        }
+
         symbolValuesDiv.innerHTML = "<h3>Valeurs des Symboles et Gains:</h3>";
         symbolsConfig.forEach(item => {
-            const symbolInfo = document.createElement('p');
-            const tripleWin = item.symbol === "🍎" ? "0" : `+${item.value * 10}`;
-            const doubleWin = item.symbol === "🍎" ? "0" : `+${item.value * 2}`;
-            symbolInfo.innerHTML = `<strong>${item.symbol}</strong> : ${item.value} 🪙<br>
-                                   Triple: ${tripleWin} 🪙<br>
-                                   Double: ${doubleWin} 🪙<br>
-                                   (Rareté: ${item.rarity})`;
-            symbolValuesDiv.appendChild(symbolInfo);
+            const triple = item.symbol === "🍎" ? "0" : `+${item.value * 10}`;
+            const double = item.symbol === "🍎" ? "0" : `+${item.value * 2}`;
+            const p = document.createElement('p');
+            p.innerHTML = `<strong>${item.symbol}</strong> : ${item.value} 🪙<br>Triple: ${triple}<br>Double: ${double}<br>(Rareté: ${item.rarity})`;
+            symbolValuesDiv.appendChild(p);
         });
-        const appleInfo = document.createElement('p');
-        appleInfo.innerHTML = `<strong>🍎 Pomme</strong> : 0 🪙<br>(Rareté: ${symbolsConfig.find(s => s.symbol === "🍎").rarity})`;
-        symbolValuesDiv.appendChild(appleInfo);
 
-        // Initialisation de la valeur en euros et des crédits depuis le localStorage
-        popup.textContent = `${credits} 🪙 = ${(credits * baseCreditValue).toFixed(4)} €`;
         updateCredits();
     </script>
 </body>
