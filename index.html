@@ -219,6 +219,7 @@
   </main>
 
   <div id="fixedButtons">
+    <button onclick="watchBigAd()" id="bigAdButton">Regarder une pub 30s (+5 🪙)</button>
     <button id="infoButton" onclick="toggleSymbolValues()">Symboles & Gains</button>
     <button id="withdrawButton" onclick="showWithdrawForm()" disabled>Retirer l’argent (1000🪙 min)</button>
   </div>
@@ -241,7 +242,7 @@
       <a href="https://erazhub30.vercel.app" target="_blank" style="color: white; font-size: 1.3em; text-decoration: underline;">
         Eraz Group
       </a>
-      <p style="margin-top: 15px; font-size: 1em;">Fermeture automatique dans 5 secondes...</p>
+      <p id="adTimer" style="margin-top: 15px; font-size: 1em;"></p>
     </div>
   </div>
 
@@ -365,7 +366,22 @@
         credits += 1;
         adRequired = false;
         updateCredits();
-      }, 5000);
+      }, 
+    function watchBigAd() {
+      let duration = 30;
+      adPopup.style.display = "flex";
+      document.getElementById("adTimer").textContent = `Fermeture dans ${duration} secondes...`;
+      
+      const interval = setInterval(() => {
+        duration--;
+        document.getElementById("adTimer").textContent = `Fermeture dans ${duration} secondes...`;
+        if (duration <= 0) {
+          clearInterval(interval);
+          adPopup.style.display = "none";
+          credits += 5;
+          updateCredits();
+        }
+      }, 1000);
     }
 
     function showWithdrawForm() {
