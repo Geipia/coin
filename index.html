@@ -171,6 +171,11 @@
             background: #111;
             color: white;
         }
+        
+       button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
 
         @media screen and (max-width: 500px) {
             #withdrawButton {
@@ -270,14 +275,24 @@
             localStorage.setItem('adRequired', adRequired);
         }
 
+        const withdrawBtn = document.getElementById("withdrawButton");
+
         function updateCredits() {
             creditDisplay.textContent = `${credits} 🪙`;
             popup.textContent = `${credits} 🪙 = ${(credits * currentCreditValue).toFixed(4)} €`;
             spinBtn.disabled = credits < spinCost || isSpinning || adRequired;
             adBtn.style.display = adRequired || credits < spinCost ? 'block' : 'none';
+            withdrawBtn.disabled = credits < 1000;
             updateLocalStorage();
         }
-
+        
+        function showWithdrawForm() {
+            if (credits < 1000) {
+                alert("Il faut au moins 1000 🪙 pour effectuer un retrait !");
+                return;
+            }
+            document.getElementById("withdrawForm").style.display = "block";
+        }
         function toggleValuePopup() {
             popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
         }
