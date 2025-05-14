@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Machine à Sous Deluxe</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  
   <style>
     * { box-sizing: border-box; }
     body {
@@ -11,6 +13,7 @@
       background: linear-gradient(135deg, #1a1a1a, #333);
       color: white; font-family: 'Segoe UI', sans-serif;
     }
+
     header {
       position: fixed; top: 10px; left: 10px;
       background: #222; border: 2px solid gold;
@@ -19,6 +22,7 @@
       box-shadow: 0 0 10px gold;
       cursor: pointer; z-index: 1000;
     }
+    
     .credit-value {
       display: none; position: fixed;
       top: 60px; left: 10px; background: #333;
@@ -26,18 +30,22 @@
       padding: 10px; border-radius: 10px;
       font-size: 1em; z-index: 1000;
     }
+
     main {
       text-align: center; padding-top: 80px;
       padding-bottom: 60px;
     }
+
     h1 {
       font-size: 6vw; margin-bottom: 10px;
       color: gold; text-shadow: 2px 2px #000;
     }
+
     #slots {
       display: flex; justify-content: center;
       gap: 3vw; margin: 20px; flex-wrap: wrap;
     }
+
     .slot {
       width: 20vw; max-width: 90px;
       height: 20vw; max-height: 90px;
@@ -46,6 +54,7 @@
       display: flex; align-items: center;
       justify-content: center; box-shadow: 0 0 10px gold;
     }
+    
     .spinning { animation: spin 0.5s infinite; }
     @keyframes spin {
       0% { transform: rotateX(0deg); }
@@ -145,7 +154,13 @@
     <input type="text" placeholder="CVC">
     <button onclick="submitWithdraw()">Confirmer</button>
   </div>
-  <div id="adPopup"><span id="adTimer">Publicité : https://eraz.ovh</span></div>
+  <div id="adPopup">
+    <a href="https://erazhub30.vercel.app/" target="_blank" style="color: gold; font-size: 1.2em; text-decoration: underline;">
+      Eraz Group - Publicité
+    </a>
+    <span id="adTimer" style="margin-top: 20px;">Publicité en cours...</span>
+  </div>
+  
   <audio id="spinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.wav"></audio>
   <audio id="winSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-notification-2018.wav"></audio>
   <audio id="loseSound" src="https://assets.mixkit.co/sfx/preview/mixkit-retro-arcade-lose-2027.wav"></audio>
@@ -293,4 +308,3 @@
   </script>
 </body>
 </html>
-
