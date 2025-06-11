@@ -337,11 +337,11 @@
     let time = 30;
     adPopup.style.display = "flex";
     const adTimer = document.getElementById("adTimer");
-    adTimer.textContent = `https://eraz.ovh - Fin dans ${time}s`;
+    adTimer.textContent = `Fin dans ${time}s`;
 
     const interval = setInterval(() => {
       time--;
-      adTimer.textContent = `https://eraz.ovh - Fin dans ${time}s`;
+      adTimer.textContent = `Fin dans ${time}s`;
       if (time <= 0) {
         clearInterval(interval);
         adPopup.style.display = "none";
