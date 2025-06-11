@@ -164,147 +164,167 @@
   <audio id="spinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.wav"></audio>
   <audio id="winSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-notification-2018.wav"></audio>
   <audio id="loseSound" src="https://assets.mixkit.co/sfx/preview/mixkit-retro-arcade-lose-2027.wav"></audio>
-  <script>
-    const symbolsConfig = [
-      { symbol: "🍒", value: 2, rarity: 30 },
-      { symbol: "🍋", value: 3, rarity: 20 },
-      { symbol: "🍎", value: 0, rarity: 80 },
-      { symbol: "🍊", value: 5, rarity: 10 },
-      { symbol: "🔔", value: 10, rarity: 5 },
-      { symbol: "⭐", value: 20, rarity: 2 },
-      { symbol: "💎", value: 30, rarity: 1 }
-    ];
-    const slots = [slot1, slot2, slot3];
-    let credits = parseInt(localStorage.getItem('credits')) || 10;
-    let spinCounter = parseInt(localStorage.getItem('spinCounter')) || 0;
-    const spinCost = 1;
-    const baseCreditValue = 0.01358;
-    const popup = document.getElementById("creditPopup");
-    const adPopup = document.getElementById("adPopup");
-    const withdrawBtn = document.getElementById("withdrawButton");
+ <script>
+  const symbolsConfig = [
+    { symbol: "🍒", value: 2, rarity: 30 },
+    { symbol: "🍋", value: 3, rarity: 20 },
+    { symbol: "🍎", value: 0, rarity: 80 },
+    { symbol: "🍊", value: 5, rarity: 10 },
+    { symbol: "🔔", value: 10, rarity: 5 },
+    { symbol: "⭐", value: 20, rarity: 2 },
+    { symbol: "💎", value: 30, rarity: 1 }
+  ];
 
-    let weightedSymbols = [];
-    symbolsConfig.forEach(item => {
-      for (let i = 0; i < item.rarity; i++) weightedSymbols.push(item.symbol);
-    });
+  const slots = [slot1, slot2, slot3];
+  const spinCost = 1;
+  const baseCreditValue = 0.01358;
+  let credits = parseInt(localStorage.getItem('credits')) || 10;
+  let spinCounter = parseInt(localStorage.getItem('spinCounter')) || 0;
 
-    function updateCredits() {
-      creditAmount.textContent = `${credits} 🪙`;
-      popup.textContent = `${credits} 🪙 = ${(credits * baseCreditValue).toFixed(4)} €`;
-      spinButton.disabled = credits < spinCost;
-      withdrawBtn.disabled = credits < 1000;
-      localStorage.setItem('credits', credits);
-      localStorage.setItem('spinCounter', spinCounter);
+  const popup = document.getElementById("creditPopup");
+  const adPopup = document.getElementById("adPopup");
+  const withdrawBtn = document.getElementById("withdrawButton");
+  const symbolValues = document.getElementById("symbolValues");
+
+  const spinSound = document.getElementById("spinSound");
+  const winSound = document.getElementById("winSound");
+  const loseSound = document.getElementById("loseSound");
+
+  let weightedSymbols = [];
+  symbolsConfig.forEach(item => {
+    for (let i = 0; i < item.rarity; i++) {
+      weightedSymbols.push(item.symbol);
     }
+  });
 
-    function toggleValuePopup() {
-      popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+  function updateCredits() {
+    creditAmount.textContent = `${credits} 🪙`;
+    popup.textContent = `${credits} 🪙 = ${(credits * baseCreditValue).toFixed(4)} €`;
+    spinButton.disabled = credits < spinCost;
+    withdrawBtn.disabled = credits < 1000;
+    localStorage.setItem('credits', credits);
+    localStorage.setItem('spinCounter', spinCounter);
+  }
+
+  function toggleValuePopup() {
+    popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+  }
+
+  function toggleSymbolValues() {
+    symbolValues.style.display = symbolValues.style.display === 'block' ? 'none' : 'block';
+  }
+
+  function prepareSpin() {
+    if (credits < spinCost) return;
+    if (spinCounter >= 10) {
+      showAdBeforeSpin();
+    } else {
+      doSpin();
     }
+  }
 
-    function toggleSymbolValues() {
-      symbolValues.style.display = symbolValues.style.display === 'block' ? 'none' : 'block';
-    }
+  function showAdBeforeSpin() {
+    let time = 5;
+    adPopup.style.display = "flex";
+    const adTimer = document.getElementById("adTimer");
+    adTimer.textContent = `https://eraz.ovh - Fin dans ${time}s`;
 
-    function prepareSpin() {
-      if (credits < spinCost) return;
-      if (spinCounter >= 10) {
-        showAdBeforeSpin();
-      } else {
+    const interval = setInterval(() => {
+      time--;
+      adTimer.textContent = `https://eraz.ovh - Fin dans ${time}s`;
+      if (time <= 0) {
+        clearInterval(interval);
+        adPopup.style.display = "none";
+        credits += 1;
+        spinCounter = 0;
+        updateCredits();
         doSpin();
       }
-    }
+    }, 1000);
+  }
 
-    function showAdBeforeSpin() {
-      let time = 5;
-      adPopup.style.display = "flex";
-      const adTimer = document.getElementById("adTimer");
-      adTimer.textContent = `https://eraz.ovh - Fin dans ${time}s`;
-      const interval = setInterval(() => {
-        time--;
-        adTimer.textContent = `https://eraz.ovh - Fin dans ${time}s`;
-        if (time <= 0) {
-          clearInterval(interval);
-          adPopup.style.display = "none";
-          credits += 1;
-          spinCounter = 0;
-          updateCredits();
-          doSpin();
-        }
-      }, 1000);
-    }
+  function doSpin() {
+    credits -= spinCost;
+    spinSound.play();
+    result.textContent = "Tirage en cours...";
+    slots.forEach(s => s.classList.add("spinning"));
 
-    function doSpin() {
-      credits -= spinCost;
-      spinSound.play();
-      result.textContent = "Tirage en cours...";
-      slots.forEach(s => s.classList.add("spinning"));
-      setTimeout(() => {
-        slots.forEach(s => s.classList.remove("spinning"));
-        let resultSymbols = [], gain = 0;
-        for (let i = 0; i < 3; i++) {
-          const sym = weightedSymbols[Math.floor(Math.random() * weightedSymbols.length)];
-          slots[i].textContent = sym;
-          resultSymbols.push(sym);
-        }
-        const [a, b, c] = resultSymbols;
-        if (a === b && b === c && a !== "🍎") {
-          gain = symbolsConfig.find(e => e.symbol === a).value * 10;
-          winSound.play();
-          result.textContent = `🎉 TRIPLE ${a} ! +${gain} 🪙`;
-        } else if ((a === b || b === c || a === c) && !resultSymbols.includes("🍎")) {
-          const match = a === b ? a : b === c ? b : a;
-          gain = symbolsConfig.find(e => e.symbol === match).value * 2;
-          winSound.play();
-          result.textContent = `✨ DOUBLE ${match} ! +${gain} 🪙`;
-        } else {
-          loseSound.play();
-          result.textContent = `❌ Rien gagné.`;
-        }
-        credits += gain;
-        spinCounter++;
-        updateCredits();
-      }, 1500);
-    }
+    setTimeout(() => {
+      slots.forEach(s => s.classList.remove("spinning"));
+      let resultSymbols = [], gain = 0;
 
-    function watchBigAd() {
-      let time = 30;
-      adPopup.style.display = "flex";
-      const adTimer = document.getElementById("adTimer");
-      adTimer.textContent = `https://eraz.ovh - Fin dans ${time}s`;
-      const interval = setInterval(() => {
-        time--;
-        adTimer.textContent = `https://eraz.ovh - Fin dans ${time}s`;
-        if (time <= 0) {
-          clearInterval(interval);
-          adPopup.style.display = "none";
-          credits += 5;
-          updateCredits();
-        }
-      }, 1000);
-    }
-
-    function showWithdrawForm() {
-      if (credits < 1000) {
-        alert("Il faut au moins 1000 🪙 pour retirer !");
-        return;
+      for (let i = 0; i < 3; i++) {
+        const sym = weightedSymbols[Math.floor(Math.random() * weightedSymbols.length)];
+        slots[i].textContent = sym;
+        resultSymbols.push(sym);
       }
-      withdrawForm.style.display = "block";
+
+      const [a, b, c] = resultSymbols;
+      if (a === b && b === c && a !== "🍎") {
+        gain = symbolsConfig.find(e => e.symbol === a).value * 10;
+        winSound.play();
+        result.textContent = `🎉 TRIPLE ${a} ! +${gain} 🪙`;
+      } else if ((a === b || b === c || a === c) && !resultSymbols.includes("🍎")) {
+        const match = a === b ? a : b === c ? b : a;
+        gain = symbolsConfig.find(e => e.symbol === match).value * 2;
+        winSound.play();
+        result.textContent = `✨ DOUBLE ${match} ! +${gain} 🪙`;
+      } else {
+        loseSound.play();
+        result.textContent = `❌ Rien gagné.`;
+      }
+
+      credits += gain;
+      spinCounter++;
+      updateCredits();
+    }, 1500);
+  }
+
+  function watchBigAd() {
+    let time = 30;
+    adPopup.style.display = "flex";
+    const adTimer = document.getElementById("adTimer");
+    adTimer.textContent = `https://eraz.ovh - Fin dans ${time}s`;
+
+    const interval = setInterval(() => {
+      time--;
+      adTimer.textContent = `https://eraz.ovh - Fin dans ${time}s`;
+      if (time <= 0) {
+        clearInterval(interval);
+        adPopup.style.display = "none";
+        credits += 5;
+        updateCredits();
+      }
+    }, 1000);
+  }
+
+  function showWithdrawForm() {
+    if (credits < 1000) {
+      alert("Il faut au moins 1000 🪙 pour retirer !");
+      return;
     }
+    withdrawForm.style.display = "block";
+  }
 
-    function submitWithdraw() {
-      alert("Demande envoyée !");
-      withdrawForm.style.display = "none";
-    }
-
-    symbolsConfig.forEach(item => {
-      const t = item.symbol === "🍎" ? "0" : `+${item.value * 10}`;
-      const d = item.symbol === "🍎" ? "0" : `+${item.value * 2}`;
-      const p = document.createElement("p");
-      p.innerHTML = `<strong>${item.symbol}</strong> : ${item.value} 🪙<br>Triple: ${t}<br>Double: ${d}<br>(Rareté: ${item.rarity})`;
-      symbolValues.appendChild(p);
-    });
-
+  function submitWithdraw() {
+    alert("Demande envoyée !");
+    withdrawForm.style.display = "none";
+    credits = 0;
+    spinCounter = 0;
     updateCredits();
-  </script>
+  }
+
+  // Génération dynamique des infos de symboles
+  symbolsConfig.forEach(item => {
+    const t = item.symbol === "🍎" ? "0" : `+${item.value * 10}`;
+    const d = item.symbol === "🍎" ? "0" : `+${item.value * 2}`;
+    const p = document.createElement("p");
+    p.innerHTML = `<strong>${item.symbol}</strong> : ${item.value} 🪙<br>Triple: ${t}<br>Double: ${d}<br>(Rareté: ${item.rarity})`;
+    symbolValues.appendChild(p);
+  });
+
+  updateCredits();
+</script>
+
 </body>
 </html>
