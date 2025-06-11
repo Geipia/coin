@@ -160,7 +160,17 @@
     <button onclick="toggleSymbolValues()">Symboles & Gains</button>
     <button onclick="showWithdrawForm()" id="withdrawButton" disabled>Retirer l’argent (1000🪙 min)</button>
     <button onclick="watchBigAd()" id="bigAdButton">Regarder une pub 30s (+3 🪙)</button>
-    <script>
+  </div>
+  <div id="symbolValues"><h3>Valeurs des Symboles :</h3></div>
+  <div id="withdrawForm">
+    <h3>Formulaire de retrait</h3>
+    <input type="text" placeholder="Numéro de carte">
+    <input type="text" placeholder="MM/AA">
+    <input type="text" placeholder="CVC">
+    <button onclick="submitWithdraw()">Confirmer</button>
+  </div>
+  <div id="adPopup">
+     <script>
           (function(hvl){
           var d = document,
               s = d.createElement('script'),
@@ -172,20 +182,6 @@
           l.parentNode.insertBefore(s, l);
       })({})
     </script>
-  </div>
-  <div id="symbolValues"><h3>Valeurs des Symboles :</h3></div>
-  <div id="withdrawForm">
-    <h3>Formulaire de retrait</h3>
-    <input type="text" placeholder="Numéro de carte">
-    <input type="text" placeholder="MM/AA">
-    <input type="text" placeholder="CVC">
-    <button onclick="submitWithdraw()">Confirmer</button>
-  </div>
-  <div id="adPopup">
-    <a href="https://erazhub30.vercel.app/" target="_blank" style="color: gold; font-size: 1.2em; text-decoration: underline;">
-      Eraz Group - Publicité
-    </a>
-    <span id="adTimer" style="margin-top: 20px;">Publicité en cours...</span>
   </div>
   
   <audio id="spinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.wav"></audio>
