@@ -72,6 +72,24 @@
     button:disabled {
       opacity: 0.5; cursor: not-allowed;
     }
+
+    /* Bouton TIRER XXL */
+    #spinButton {
+      font-size: 2em;
+      padding: 30px 70px;
+      margin: 20px 10px;
+      background: linear-gradient(to right, #f90, #fa0);
+      border: none; border-radius: 16px;
+      color: white; cursor: pointer;
+      box-shadow: 0 0 16px #f90;
+      font-weight: bold;
+      letter-spacing: 2px;
+      transition: transform 0.1s;
+    }
+    #spinButton:active {
+      transform: scale(0.97);
+    }
+
     #fixedButtons {
       position: fixed; bottom: 10px; left: 10px;
       display: flex; flex-direction: column;
@@ -224,10 +242,12 @@
     }
   });
 
+  let spinInProgress = false; // <--- AJOUTÉ
+
   function updateCredits() {
     creditAmount.textContent = `${credits} 🪙`;
     popup.textContent = `${credits} 🪙 = ${(credits * baseCreditValue).toFixed(4)} €`;
-    spinButton.disabled = credits < spinCost;
+    spinButton.disabled = spinInProgress || credits < spinCost;
     withdrawBtn.disabled = credits < 1000;
     localStorage.setItem('credits', credits);
     localStorage.setItem('spinCounter', spinCounter);
@@ -242,6 +262,7 @@
   }
 
   function prepareSpin() {
+    if (spinInProgress) return;
     if (credits < spinCost) return;
     if (spinCounter >= 10) {
       showAdBeforeSpin();
@@ -271,6 +292,9 @@
   }
 
   function doSpin() {
+    spinInProgress = true;
+    spinButton.disabled = true;
+
     credits -= spinCost;
     spinSound.play();
     result.textContent = "Tirage en cours...";
@@ -303,7 +327,9 @@
 
       credits += gain;
       spinCounter++;
+      spinInProgress = false; // <--- DÉBLOQUE LE BOUTON
       updateCredits();
+
     }, 1500);
   }
 
